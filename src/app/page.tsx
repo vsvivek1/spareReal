@@ -217,7 +217,13 @@ export default function HomePage() {
           </div>
 
           <div className="gx-chip-row">
-            <span className="gx-chip">{profile.role}</span>
+            {(profile.roles || (profile.role ? [profile.role] : [])).map(
+              (role: string) => (
+                <span className="gx-chip" key={role}>
+                  {role}
+                </span>
+              )
+            )}
             <span
               className={
                 "gx-chip" + (profile.isPremium ? " gx-chip-gold" : "")

@@ -66,9 +66,24 @@ export default function RegisterPage(){
  setPlace] =
  useState("");
 
- const [role,
- setRole] =
- useState("Buyer");
+ const [roles,
+ setRoles] =
+ useState<string[]>(["Buyer"]);
+
+ const toggleRole =
+ (option:string)=>{
+
+   setRoles((prev)=>
+
+     prev.includes(option)
+     ? prev.filter(
+       (item)=>item!==option
+     )
+     : [...prev, option]
+
+   );
+
+ };
 
  const [username,
  setUsername] =
@@ -81,6 +96,14 @@ export default function RegisterPage(){
  const [confirmPassword,
  setConfirmPassword] =
  useState("");
+
+ const [showPassword,
+ setShowPassword] =
+ useState(false);
+
+ const [showConfirmPassword,
+ setShowConfirmPassword] =
+ useState(false);
 
  // Check auth + existing profile
  useEffect(()=>{
@@ -201,6 +224,16 @@ export default function RegisterPage(){
 
    }
 
+   if(roles.length === 0){
+
+     setError(
+       "Select at least one option for \"I am a\"."
+     );
+
+     return;
+
+   }
+
    try{
 
      setSaving(true);
@@ -247,7 +280,7 @@ export default function RegisterPage(){
 
          place,
 
-         role,
+         roles,
 
          isPremium:false,
 
@@ -331,9 +364,10 @@ setUsername(
 
 <div className="gx-field">
 <label className="gx-label">Password</label>
+<div className="gx-input-group">
 <input
 className="gx-input"
-type="password"
+type={showPassword ? "text" : "password"}
 placeholder="At least 6 characters"
 value={password}
 autoComplete="new-password"
@@ -342,13 +376,23 @@ setPassword(
  e.target.value
 )}
 />
+<button
+type="button"
+className="gx-input-icon-btn"
+onClick={() => setShowPassword((v) => !v)}
+aria-label={showPassword ? "Hide password" : "Show password"}
+>
+{showPassword ? "🙈" : "👁"}
+</button>
+</div>
 </div>
 
 <div className="gx-field">
 <label className="gx-label">Confirm password</label>
+<div className="gx-input-group">
 <input
 className="gx-input"
-type="password"
+type={showConfirmPassword ? "text" : "password"}
 placeholder="••••••••"
 value={confirmPassword}
 autoComplete="new-password"
@@ -357,6 +401,15 @@ setConfirmPassword(
  e.target.value
 )}
 />
+<button
+type="button"
+className="gx-input-icon-btn"
+onClick={() => setShowConfirmPassword((v) => !v)}
+aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+>
+{showConfirmPassword ? "🙈" : "👁"}
+</button>
+</div>
 </div>
 
 <div className="gx-divider">Profile</div>
@@ -423,29 +476,28 @@ setPlace(
 </div>
 
 <div className="gx-field">
-<label className="gx-label">I am a</label>
-<select
-className="gx-input"
-value={role}
-onChange={(e)=>
-setRole(
- e.target.value
-)}
+<label className="gx-label">I am a (select all that apply)</label>
+<div className="gx-role-group">
+
+{["Buyer", "Seller", "Workshop"].map((option)=>(
+
+<button
+key={option}
+type="button"
+className={
+ "gx-role-option" +
+ (roles.includes(option)
+   ? " gx-role-option-active"
+   : "")
+}
+onClick={()=>toggleRole(option)}
 >
+{option}
+</button>
 
-<option>
- Buyer
-</option>
+))}
 
-<option>
- Seller
-</option>
-
-<option>
- Workshop
-</option>
-
-</select>
+</div>
 </div>
 
 <button

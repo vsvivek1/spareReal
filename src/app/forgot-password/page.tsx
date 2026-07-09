@@ -32,6 +32,8 @@ export default function ForgotPasswordPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
 
@@ -326,14 +328,29 @@ export default function ForgotPasswordPage() {
 
               <label className="gx-label">New password</label>
 
-              <input
-                className="gx-input"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="••••••••"
-                autoComplete="new-password"
-              />
+              <div className="gx-input-group">
+
+                <input
+                  className="gx-input"
+                  type={showNewPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                />
+
+                <button
+                  type="button"
+                  className="gx-input-icon-btn"
+                  onClick={() => setShowNewPassword((v) => !v)}
+                  aria-label={
+                    showNewPassword ? "Hide password" : "Show password"
+                  }
+                >
+                  {showNewPassword ? "🙈" : "👁"}
+                </button>
+
+              </div>
 
             </div>
 
@@ -341,19 +358,34 @@ export default function ForgotPasswordPage() {
 
               <label className="gx-label">Confirm password</label>
 
-              <input
-                className="gx-input"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                autoComplete="new-password"
-                onKeyDown={(e) => {
+              <div className="gx-input-group">
 
-                  if (e.key === "Enter") handleSetPassword();
+                <input
+                  className="gx-input"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  onKeyDown={(e) => {
 
-                }}
-              />
+                    if (e.key === "Enter") handleSetPassword();
+
+                  }}
+                />
+
+                <button
+                  type="button"
+                  className="gx-input-icon-btn"
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
+                >
+                  {showConfirmPassword ? "🙈" : "👁"}
+                </button>
+
+              </div>
 
             </div>
 

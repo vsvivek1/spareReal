@@ -1,250 +1,188 @@
 "use client";
 
-import {
- useEffect,
- useState
-} from "react";
-
-import {
- useRouter
-} from "next/navigation";
-
-import {
- useAuth
-} from "@/contexts/AuthContext";
-
-import {
- getUserProfile,
- updateUserProfile
-} from "@/services/userService";
-
-export default function EditPage(){
-
- const router =
- useRouter();
-
- const {
-   user
- } = useAuth();
-
- const [loading,
- setLoading] =
- useState(true);
-
- const [name,
- setName] =
- useState("");
-
- const [phone,
- setPhone] =
- useState("");
-
- const [email,
- setEmail] =
- useState("");
-
- const [district,
- setDistrict] =
- useState("");
-
- const [place,
- setPlace] =
- useState("");
-
- const [role,
- setRole] =
- useState("Buyer");
-
- useEffect(()=>{
-
-   const loadProfile =
-   async()=>{
-
-     if(!user) return;
-
-     const data =
-     await getUserProfile(
-       user.uid
-     );
-
-     if(data){
-
-       setName(
-         data.name || ""
-       );
-
-       setPhone(
-         data.phone || ""
-       );
-
-       setEmail(
-         data.email || ""
-       );
-
-       setDistrict(
-         data.district || ""
-       );
-
-       setPlace(
-         data.place || ""
-       );
-
-       setRole(
-         data.role || "Buyer"
-       );
-
-     }
-
-     setLoading(false);
-
-   };
-
-   loadProfile();
-
- },[user]);
-
- const handleSave =
- async()=>{
-
-   try{
-
-     if(!user) return;
-
-     await updateUserProfile(
-       user.uid,
-       {
-         name,
-         phone,
-         email,
-         district,
-         place,
-         role
-       }
-     );
-
-     alert(
-       "Profile updated"
-     );
-
-     router.push(
-       "/user/profile"
-     );
-
-   }catch(error){
-
-     console.log(error);
-
-   }
-
- };
-
- if(loading){
-
-   return <h1>Loading...</h1>;
-
- }
-
- return(
-
-<div
-style={{
- padding:"30px",
- maxWidth:"500px"
-}}
->
-
-<h1>
- Edit Profile
-</h1>
-
-<br/>
-
-<input
-placeholder="Name"
-value={name}
-onChange={(e)=>
-setName(
- e.target.value
-)}
-/>
-
-<br/><br/>
-
-<input
-placeholder="Phone"
-value={phone}
-disabled
-/>
-
-<br/><br/>
-
-<input
-placeholder="Email"
-value={email}
-onChange={(e)=>
-setEmail(
- e.target.value
-)}
-/>
-
-<br/><br/>
-
-<input
-placeholder="District"
-value={district}
-onChange={(e)=>
-setDistrict(
- e.target.value
-)}
-/>
-
-<br/><br/>
-
-<input
-placeholder="Place"
-value={place}
-onChange={(e)=>
-setPlace(
- e.target.value
-)}
-/>
-
-<br/><br/>
-
-<select
-value={role}
-onChange={(e)=>
-setRole(
- e.target.value
-)}
->
-
-<option>
- Buyer
-</option>
-
-<option>
- Seller
-</option>
-
-<option>
- Workshop
-</option>
-
-</select>
-
-<br/><br/>
-
-<button
-onClick={
- handleSave
-}
->
- Save Changes
-</button>
-
-</div>
-
- );
-
+import { useEffect, useState } from "react";
+
+import { useRouter } from "next/navigation";
+
+import { useAuth } from "@/contexts/AuthContext";
+
+import { getUserProfile, updateUserProfile } from "@/services/userService";
+
+export default function EditPage() {
+  const router = useRouter();
+
+  const { user } = useAuth();
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [district, setDistrict] = useState("");
+  const [place, setPlace] = useState("");
+
+  const [roles, setRoles] = useState<string[]>(["Buyer"]);
+
+  const toggleRole = (option: string) => {
+    setRoles((prev) =>
+      prev.includes(option)
+        ? prev.filter((item) => item !== option)
+        : [...prev, option]
+    );
+  };
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user) return;
+
+      const data = await getUserProfile(user.uid);
+
+      if (data) {
+        setName(data.name || "");
+        setPhone(data.phone || "");
+        setEmail(data.email || "");
+        setDistrict(data.district || "");
+        setPlace(data.place || "");
+        setRoles(data.roles || (data.role ? [data.role] : ["Buyer"]));
+      }
+
+      setLoading(false);
+    };
+
+    loadProfile();
+  }, [user]);
+
+  const handleSave = async () => {
+    try {
+      if (!user) return;
+
+      setSaving(true);
+
+      await updateUserProfile(user.uid, {
+        name,
+        phone,
+        email,
+        district,
+        place,
+        roles,
+      });
+
+      router.push("/user/profile");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="gx-page">
+        <div className="gx-page-center">
+          <span className="gx-spinner" />
+          Loading...
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="gx-page">
+      <div className="gx-container">
+        <div className="gx-page-header">
+          <h1 className="gx-dash-title">Edit Profile</h1>
+          <p className="gx-dash-sub">Keep your details up to date.</p>
+        </div>
+
+        <div className="gx-form-card">
+          <div className="gx-field">
+            <label className="gx-label">Name</label>
+            <input
+              className="gx-input"
+              placeholder="Full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
+          <div className="gx-field">
+            <label className="gx-label">Phone</label>
+            <input className="gx-input" value={phone} disabled />
+          </div>
+
+          <div className="gx-field">
+            <label className="gx-label">Email</label>
+            <input
+              className="gx-input"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className="gx-field">
+            <label className="gx-label">District</label>
+            <input
+              className="gx-input"
+              placeholder="District"
+              value={district}
+              onChange={(e) => setDistrict(e.target.value)}
+            />
+          </div>
+
+          <div className="gx-field">
+            <label className="gx-label">Place</label>
+            <input
+              className="gx-input"
+              placeholder="Place"
+              value={place}
+              onChange={(e) => setPlace(e.target.value)}
+            />
+          </div>
+
+          <div className="gx-field">
+            <label className="gx-label">I am a (select all that apply)</label>
+
+            <div className="gx-role-group">
+              {["Buyer", "Seller", "Workshop"].map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  className={
+                    "gx-role-option" +
+                    (roles.includes(option) ? " gx-role-option-active" : "")
+                  }
+                  onClick={() => toggleRole(option)}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="gx-form-actions">
+            <button
+              type="button"
+              className="gx-btn gx-btn-outline"
+              onClick={() => router.push("/user/profile")}
+              disabled={saving}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              className="gx-btn gx-btn-primary"
+              onClick={handleSave}
+              disabled={saving}
+            >
+              {saving && <span className="gx-spinner" />}
+              {saving ? "Saving..." : "Save changes"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
