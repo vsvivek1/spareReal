@@ -15,8 +15,14 @@ import {
 
 import {
  getUserProfile,
- saveUserProfile
+ saveUserProfile,
+ isUsernameTaken,
+ normalizeUsername
 } from "@/services/userService";
+
+import {
+ setAccountPassword
+} from "@/services/authService";
 
 export default function RegisterPage(){
 
@@ -35,6 +41,10 @@ export default function RegisterPage(){
  const [saving,
  setSaving] =
  useState(false);
+
+ const [error,
+ setError] =
+ useState("");
 
  const [name,
  setName] =
@@ -59,6 +69,18 @@ export default function RegisterPage(){
  const [role,
  setRole] =
  useState("Buyer");
+
+ const [username,
+ setUsername] =
+ useState("");
+
+ const [password,
+ setPassword] =
+ useState("");
+
+ const [confirmPassword,
+ setConfirmPassword] =
+ useState("");
 
  // Check auth + existing profile
  useEffect(()=>{
@@ -119,29 +141,91 @@ export default function RegisterPage(){
  const handleRegister =
  async()=>{
 
+   setError("");
+
+   if(!user){
+
+     setError(
+       "User not found. Please verify your phone again."
+     );
+
+     return;
+
+   }
+
+   if(!name.trim()){
+
+     setError(
+       "Enter your name."
+     );
+
+     return;
+
+   }
+
+   const normalizedUsername =
+   normalizeUsername(username);
+
+   if(
+     normalizedUsername.length < 3 ||
+     !/^[a-z0-9_.]+$/.test(
+       normalizedUsername
+     )
+   ){
+
+     setError(
+       "Username must be at least 3 characters (letters, numbers, . or _ only)."
+     );
+
+     return;
+
+   }
+
+   if(password.length < 6){
+
+     setError(
+       "Password must be at least 6 characters."
+     );
+
+     return;
+
+   }
+
+   if(password !== confirmPassword){
+
+     setError(
+       "Passwords don't match."
+     );
+
+     return;
+
+   }
+
    try{
 
-     if(!user){
-
-       alert(
-         "User not found"
-       );
-
-       return;
-
-     }
-
-     if(!name){
-
-       alert(
-         "Enter name"
-       );
-
-       return;
-
-     }
-
      setSaving(true);
+
+     const taken =
+     await isUsernameTaken(
+       normalizedUsername
+     );
+
+     if(taken){
+
+       setError(
+         "That username is already taken."
+       );
+
+       setSaving(false);
+
+       return;
+
+     }
+
+     await setAccountPassword(
+       phone,
+       password
+     );
 
      await saveUserProfile(
        user.uid,
@@ -153,6 +237,9 @@ export default function RegisterPage(){
          name,
 
          phone,
+
+         username:
+         normalizedUsername,
 
          email,
 
@@ -171,18 +258,14 @@ export default function RegisterPage(){
        }
      );
 
-     alert(
-       "Registration completed"
-     );
-
      router.push("/");
 
    }catch(error){
 
-     console.log(error);
-
-     alert(
-       "Registration failed"
+     setError(
+       error instanceof Error
+       ? error.message
+       : "Registration failed. Please try again."
      );
 
    }finally{
@@ -194,73 +277,129 @@ export default function RegisterPage(){
  };
 
  // Auth loading
- if(loading){
+ if(loading || checking){
 
    return(
-<h1>
- Loading...
-</h1>
-   );
 
- }
+<div className="gx-shell">
+<div className="gx-card">
+<p className="gx-muted">Loading...</p>
+</div>
+</div>
 
- // Checking profile
- if(checking){
-
-   return(
-<h1>
- Checking registration...
-</h1>
    );
 
  }
 
  return(
 
-<div
-style={{
- padding:"30px",
- maxWidth:"500px"
-}}
->
+<div className="gx-shell">
 
-<h1>
- Create Profile
-</h1>
+<div className="gx-card">
 
-<br/>
+<div className="gx-badge">S</div>
 
+<h1 className="gx-title">Create your profile</h1>
+
+<p className="gx-subtitle">
+Phone verified. Set up your login and tell us a bit about you.
+</p>
+
+{
+ error && (
+<div className="gx-alert gx-alert-error">
+{error}
+</div>
+ )
+}
+
+<div className="gx-step-label">Account</div>
+
+<div className="gx-field">
+<label className="gx-label">Username</label>
 <input
-placeholder="Name"
+className="gx-input"
+placeholder="yourusername"
+value={username}
+autoCapitalize="none"
+onChange={(e)=>
+setUsername(
+ e.target.value
+)}
+/>
+</div>
+
+<div className="gx-field">
+<label className="gx-label">Password</label>
+<input
+className="gx-input"
+type="password"
+placeholder="At least 6 characters"
+value={password}
+autoComplete="new-password"
+onChange={(e)=>
+setPassword(
+ e.target.value
+)}
+/>
+</div>
+
+<div className="gx-field">
+<label className="gx-label">Confirm password</label>
+<input
+className="gx-input"
+type="password"
+placeholder="••••••••"
+value={confirmPassword}
+autoComplete="new-password"
+onChange={(e)=>
+setConfirmPassword(
+ e.target.value
+)}
+/>
+</div>
+
+<div className="gx-divider">Profile</div>
+
+<div className="gx-field">
+<label className="gx-label">Name</label>
+<input
+className="gx-input"
+placeholder="Full name"
 value={name}
 onChange={(e)=>
 setName(
  e.target.value
 )}
 />
+</div>
 
-<br/><br/>
-
+<div className="gx-field">
+<label className="gx-label">Phone</label>
 <input
-placeholder="Phone"
+className="gx-input"
 value={phone}
 disabled
 />
+</div>
 
-<br/><br/>
-
+<div className="gx-field">
+<label className="gx-label">Email</label>
 <input
-placeholder="Email"
+className="gx-input"
+placeholder="you@example.com"
 value={email}
 onChange={(e)=>
 setEmail(
  e.target.value
 )}
 />
+</div>
 
-<br/><br/>
-
+<div className="gx-field">
+<label className="gx-label">District</label>
 <input
+className="gx-input"
 placeholder="District"
 value={district}
 onChange={(e)=>
@@ -268,10 +407,12 @@ setDistrict(
  e.target.value
 )}
 />
+</div>
 
-<br/><br/>
-
+<div className="gx-field">
+<label className="gx-label">Place</label>
 <input
+className="gx-input"
 placeholder="Place"
 value={place}
 onChange={(e)=>
@@ -279,10 +420,12 @@ setPlace(
  e.target.value
 )}
 />
+</div>
 
-<br/><br/>
-
+<div className="gx-field">
+<label className="gx-label">I am a</label>
 <select
+className="gx-input"
 value={role}
 onChange={(e)=>
 setRole(
@@ -303,10 +446,11 @@ setRole(
 </option>
 
 </select>
-
-<br/><br/>
+</div>
 
 <button
+type="button"
+className="gx-btn gx-btn-primary"
 onClick={
  handleRegister
 }
@@ -315,13 +459,16 @@ disabled={
 }
 >
 
+{saving && <span className="gx-spinner" />}
 {
  saving
  ? "Saving..."
- : "Complete Registration"
+ : "Complete registration"
 }
 
 </button>
+
+</div>
 
 </div>
 

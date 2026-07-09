@@ -99,7 +99,16 @@ async(
        normalizedPhone:
        normalizePhone(
          data.phone
-       )
+       ),
+
+       ...(data.username
+         ? {
+             username:
+             normalizeUsername(
+               data.username
+             )
+           }
+         : {})
      }
    );
 
@@ -134,7 +143,16 @@ async(
        normalizedPhone:
        normalizePhone(
          data.phone
-       )
+       ),
+
+       ...(data.username
+         ? {
+             username:
+             normalizeUsername(
+               data.username
+             )
+           }
+         : {})
      }
    );
 
@@ -143,6 +161,92 @@ async(
    console.log(error);
 
  }
+
+};
+
+export const normalizeUsername =
+(username:string)=>{
+
+ return username
+ .trim()
+ .toLowerCase();
+
+};
+
+export const getUserByUsername =
+async(username:string)=>{
+
+ try{
+
+   const normalizedUsername =
+   normalizeUsername(username);
+
+   if(!normalizedUsername){
+
+     return null;
+
+   }
+
+   const q =
+   query(
+     collection(
+       db,
+       "users"
+     ),
+
+     where(
+       "username",
+       "==",
+       normalizedUsername
+     )
+   );
+
+   const snapshot =
+   await getDocs(q);
+
+   if(snapshot.empty){
+
+     return null;
+
+   }
+
+   return {
+
+     id:
+     snapshot.docs[0].id,
+
+     ...snapshot.docs[0].data()
+
+   };
+
+ }catch(error){
+
+   console.log(error);
+
+   return null;
+
+ }
+
+};
+
+export const isUsernameTaken =
+async(
+ username:string,
+ excludeUid?:string
+)=>{
+
+ const existing =
+ await getUserByUsername(
+   username
+ );
+
+ if(!existing){
+
+   return false;
+
+ }
+
+ return existing.id !== excludeUid;
 
 };
 
