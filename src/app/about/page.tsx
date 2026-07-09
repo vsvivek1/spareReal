@@ -5,26 +5,26 @@ export default function AboutPage() {
         <div className="gx-page-header" style={{ textAlign: "center" }}>
           <h1 className="gx-dash-title">About spareX</h1>
           <p className="gx-dash-sub">
-            Building a more trustworthy way to buy and sell vehicle spare
-            parts.
+            Building a more trustworthy way to buy and sell second-hand
+            vehicle spare parts.
           </p>
         </div>
 
         <div className="gx-content-card">
           <p>
-            spareX is a marketplace built for vehicle owners, spare part
-            sellers, and workshops to find each other without the usual
-            back-and-forth. Whether you're hunting down a hard-to-find
-            part or listing your inventory for buyers nearby, spareX
-            connects you directly.
+            spareX is a marketplace built for vehicle owners, second-hand
+            spare part sellers, and workshops to find each other without
+            the usual back-and-forth. Whether you're hunting down a
+            hard-to-find used part or listing your spare inventory for
+            buyers nearby, spareX connects you directly.
           </p>
 
           <p>
-            We started spareX to solve a simple problem: finding genuine
-            spare parts at a fair price shouldn't take days of phone calls
-            and dead ends. By bringing sellers, buyers, and workshops onto
-            one platform, we make the whole process faster and more
-            transparent.
+            We started spareX to solve a simple problem: finding good
+            condition, fairly priced used spare parts shouldn't take days
+            of phone calls and dead ends. By bringing sellers, buyers, and
+            workshops onto one platform, we make the whole process faster
+            and more transparent.
           </p>
 
           <p>

@@ -137,17 +137,18 @@ export default function HomePage() {
     return (
       <div className="gx-page">
         <div className="gx-hero">
-          <div className="gx-hero-eyebrow">Vehicle spare marketplace</div>
+          <div className="gx-hero-eyebrow">Second-hand spare marketplace</div>
 
           <h1 className="gx-hero-title">
-            Find genuine spare parts,
+            Quality used spare parts,
             <br />
             <span className="gx-accent">without the runaround.</span>
           </h1>
 
           <p className="gx-hero-subtitle">
-            spareX connects you with verified sellers and trusted workshops
-            so you can find the right part, at the right price, near you.
+            spareX connects you with verified sellers of second-hand vehicle
+            parts and trusted workshops, so you can find the right part, at
+            the right price, near you.
           </p>
 
           <div className="gx-hero-actions">

@@ -295,11 +295,26 @@ export default function RegisterPage(){
 
    }catch(error){
 
-     setError(
-       error instanceof Error
-       ? error.message
-       : "Registration failed. Please try again."
-     );
+     console.error("Registration failed:", error);
+
+     const code =
+       (error as { code?: string })?.code || "";
+
+     if(code === "permission-denied"){
+
+       setError(
+         "We couldn't save your profile due to a permissions issue on our end. Please contact support — your account is verified, so you won't need to redo the phone step."
+       );
+
+     }else{
+
+       setError(
+         error instanceof Error
+         ? `${error.message}${code ? ` (${code})` : ""}`
+         : "Registration failed. Please try again."
+       );
+
+     }
 
    }finally{
 

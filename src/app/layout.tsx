@@ -15,7 +15,7 @@ import {
 export const metadata: Metadata = {
  title: "spareX",
  description:
-   "Vehicle Spare Marketplace",
+   "Second-hand Vehicle Spare Marketplace",
  manifest: "/manifest.json",
  icons: {
    icon: "/icons/icon-192.png",

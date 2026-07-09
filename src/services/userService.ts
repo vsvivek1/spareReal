@@ -116,6 +116,8 @@ async(
 
    console.log(error);
 
+   throw error;
+
  }
 
 };
@@ -159,6 +161,8 @@ async(
  }catch(error){
 
    console.log(error);
+
+   throw error;
 
  }
 

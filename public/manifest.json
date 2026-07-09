@@ -1,7 +1,7 @@
 {
-  "name": "spareX — Vehicle Spare Marketplace",
+  "name": "spareX — Second-hand Vehicle Spare Marketplace",
   "short_name": "spareX",
-  "description": "Buy, sell and request vehicle spare parts.",
+  "description": "Buy, sell and request second-hand vehicle spare parts.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
