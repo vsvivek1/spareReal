@@ -73,18 +73,28 @@ function TabIcon({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Full-screen auth flows: user may already be phone-verified here (so
+// useAuth().user is truthy) but hasn't finished onboarding yet, so the
+// full app shell (bottom tab bar, drawer of interior links) must not
+// render — it has nowhere valid to navigate to and can visually
+// collide with the page's own submit button on small screens.
+const AUTH_FLOW_ROUTES = ["/login", "/forgot-password", "/user/register"];
+
 export default function Navbar() {
   const { user } = useAuth();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const isAuthFlow = AUTH_FLOW_ROUTES.includes(pathname ?? "");
+  const showAppShell = Boolean(user) && !isAuthFlow;
 
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
 
   useEffect(() => {
-    document.body.classList.toggle("gx-has-tabbar", Boolean(user));
-  }, [user]);
+    document.body.classList.toggle("gx-has-tabbar", showAppShell);
+  }, [showAppShell]);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -109,7 +119,7 @@ export default function Navbar() {
           spareX
         </Link>
 
-        {user ? (
+        {showAppShell && (
           <>
             <nav className="gx-nav-desktop">
               {navLinks.map((link) => (
@@ -145,14 +155,16 @@ export default function Navbar() {
               </TabIcon>
             </button>
           </>
-        ) : (
+        )}
+
+        {!showAppShell && !user && (
           <Link href="/login" className="gx-login-pill">
             Login
           </Link>
         )}
       </header>
 
-      {user && menuOpen && (
+      {showAppShell && menuOpen && (
         <>
           <div
             className="gx-drawer-backdrop"
@@ -202,7 +214,7 @@ export default function Navbar() {
         </>
       )}
 
-      {user && (
+      {showAppShell && (
         <nav className="gx-tabbar">
           {tabs.map((tab) =>
             tab.fab ? (
