@@ -116,11 +116,26 @@ const friendlyAuthError = (error: unknown, fallback: string) => {
       "Choose a stronger password (at least 6 characters).",
 
     "auth/network-request-failed":
-      "Network error. Check your connection and try again."
+      "Network error. Check your connection and try again.",
+
+    "auth/credential-already-in-use":
+      "This phone number is already registered with a different account. Try logging in instead, or use forgot password.",
+
+    "auth/operation-not-allowed":
+      "Sign-in with a password isn't enabled for this app yet. Contact support.",
+
+    "auth/requires-recent-login":
+      "Please verify your phone again before changing your password."
 
   };
 
-  return new Error(messages[code] || fallback);
+  // Log the raw code so it shows up in browser devtools even when the
+  // fallback text below is generic — makes remote bug reports actionable.
+  console.error("Firebase auth error:", code, error);
+
+  return new Error(
+    messages[code] || `${fallback}${code ? ` (${code})` : ""}`
+  );
 
 };
 

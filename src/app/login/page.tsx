@@ -22,6 +22,22 @@ export default function LoginPage() {
   const [mode, setMode] = useState<"password" | "otp">("password");
   const [error, setError] = useState("");
 
+  // Client-only: lets links like "/login?mode=otp" (e.g. the marketing
+  // header's "Sign up") land straight on the new-user tab, without
+  // needing useSearchParams' Suspense requirement for a static page.
+  useEffect(() => {
+
+    if (
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("mode") === "otp"
+    ) {
+
+      setMode("otp");
+
+    }
+
+  }, []);
+
   // password mode
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

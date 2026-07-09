@@ -1627,3 +1627,103 @@ textarea::placeholder {
   background: rgba(109, 94, 248, 0.14);
   border: 1px solid rgba(109, 94, 248, 0.35);
 }
+
+/* public marketing header */
+
+.gx-public-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  margin: 0 8px;
+}
+
+.gx-public-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.gx-btn-ghost {
+  padding: 9px 16px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--gx-text);
+  background: transparent;
+  text-decoration: none;
+  border: none;
+}
+
+.gx-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.gx-signup-pill {
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: white;
+  background: var(--gx-brand-gradient);
+  text-decoration: none;
+  box-shadow: 0 6px 14px rgba(109, 94, 248, 0.28);
+}
+
+@media (max-width: 720px) {
+  .gx-public-nav {
+    display: none;
+  }
+}
+
+/* content pages (about / contact) */
+
+.gx-content-card {
+  max-width: 640px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--gx-radius-lg);
+  padding: 32px 28px;
+}
+
+.gx-content-card p {
+  color: var(--gx-text-dim);
+  font-size: 14.5px;
+  line-height: 1.7;
+  margin: 0 0 16px;
+}
+
+.gx-content-card p:last-child {
+  margin-bottom: 0;
+}
+
+.gx-contact-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gx-contact-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--gx-text);
+}
+
+.gx-contact-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: rgba(109, 94, 248, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}

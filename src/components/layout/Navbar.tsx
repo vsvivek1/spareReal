@@ -11,6 +11,13 @@ import { auth } from "@/lib/firebase";
 
 import { useAuth } from "@/contexts/AuthContext";
 
+const publicLinks = [
+  { href: "/", label: "Home" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
+
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/spare-parts", label: "Spare Parts" },
@@ -158,9 +165,32 @@ export default function Navbar() {
         )}
 
         {!showAppShell && !user && (
-          <Link href="/login" className="gx-login-pill">
-            Login
-          </Link>
+          <>
+            <nav className="gx-public-nav">
+              {publicLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={
+                    "gx-navlink" +
+                    (isActive(link.href) ? " gx-navlink-active" : "")
+                  }
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="gx-public-actions">
+              <Link href="/login" className="gx-btn-ghost">
+                Login
+              </Link>
+
+              <Link href="/login?mode=otp" className="gx-signup-pill">
+                Sign up
+              </Link>
+            </div>
+          </>
         )}
       </header>
 
