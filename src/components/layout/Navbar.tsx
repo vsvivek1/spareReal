@@ -20,18 +20,14 @@ const publicLinks = [
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/spare-parts", label: "Spare Parts" },
+  { href: "/ground", label: "Browse" },
   { href: "/add-spare", label: "Add Spare" },
   { href: "/my-listings", label: "My Listings" },
   { href: "/make-request", label: "Request Spare" },
   { href: "/my-requests", label: "My Requests" },
-  { href: "/ground", label: "Ground" },
-  { href: "/favorites", label: "Favorites" },
-  { href: "/chat", label: "Chat" },
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/pricing", label: "Premium" },
+  { href: "/pricing", label: "Pricing" },
   { href: "/user/profile", label: "Profile" },
-  { href: "/user/edit", label: "Edit Profile" },
 ];
 
 const tabs = [
@@ -43,7 +39,7 @@ const tabs = [
     ),
   },
   {
-    href: "/spare-parts",
+    href: "/ground",
     label: "Browse",
     icon: (
       <>

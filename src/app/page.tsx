@@ -158,7 +158,7 @@ export default function HomePage() {
               </button>
             </Link>
 
-            <Link href="/spare-parts">
+            <Link href="/ground">
               <button className="gx-btn gx-btn-outline gx-btn-lg">
                 Browse spare parts
               </button>
@@ -239,7 +239,7 @@ export default function HomePage() {
 
         <div className="gx-section-head">
           <h2 className="gx-section-title">Latest spare parts</h2>
-          <Link href="/spare-parts" className="gx-section-link">
+          <Link href="/ground" className="gx-section-link">
             View all
           </Link>
         </div>
