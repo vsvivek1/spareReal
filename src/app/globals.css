@@ -608,10 +608,27 @@ textarea::placeholder {
   margin: 0;
 }
 
+.gx-chip-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
 .gx-chip-row {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
+}
+
+.gx-chip-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gx-text-faint);
+  margin-right: 2px;
 }
 
 .gx-chip {

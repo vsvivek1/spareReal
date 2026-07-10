@@ -602,10 +602,10 @@ Saved: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
 </div>
 
 <div className="gx-field">
-<label className="gx-label">I am a (select all that apply)</label>
+<label className="gx-label">Registered as (select all that apply)</label>
 <div className="gx-role-group">
 
-{["Buyer", "Seller", "Workshop"].map((option)=>(
+{["Buyer", "Seller", "Workshop", "Wholesale Dealer"].map((option)=>(
 
 <button
 key={option}

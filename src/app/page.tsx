@@ -217,21 +217,27 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="gx-chip-row">
-            {(profile.roles || (profile.role ? [profile.role] : [])).map(
-              (role: string) => (
-                <span className="gx-chip" key={role}>
-                  {role}
-                </span>
-              )
-            )}
-            <span
-              className={
-                "gx-chip" + (profile.isPremium ? " gx-chip-gold" : "")
-              }
-            >
-              {profile.isPremium ? "Premium" : "Free plan"}
-            </span>
+          <div className="gx-chip-group">
+            <div className="gx-chip-row">
+              <span className="gx-chip-label">Registered as</span>
+              {(profile.roles || (profile.role ? [profile.role] : [])).map(
+                (role: string) => (
+                  <span className="gx-chip" key={role}>
+                    ✓ {role}
+                  </span>
+                )
+              )}
+            </div>
+
+            <div className="gx-chip-row">
+              <span
+                className={
+                  "gx-chip" + (profile.isPremium ? " gx-chip-gold" : "")
+                }
+              >
+                {profile.isPremium ? "Premium" : "Free plan"}
+              </span>
+            </div>
           </div>
         </div>
 
