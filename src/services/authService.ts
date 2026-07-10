@@ -22,7 +22,13 @@ export const phoneToPseudoEmail = (phone: string) => {
 
 };
 
-// Accepts "9496010722" or "+919496010722" and returns E.164 (+91XXXXXXXXXX).
+// Accepts "9496010722", "09496010722", or "+919496010722" and returns
+// E.164 (+91XXXXXXXXXX). Reuses normalizePhone so a leading "0" (a
+// number typed the way you'd dial it with an STD prefix) is stripped
+// the same way here as everywhere else — previously this function had
+// its own incomplete copy of that logic and left the leading 0 in,
+// producing an invalid 11-digit number that Firebase would silently
+// fail to deliver an SMS to.
 export const formatPhoneE164 = (raw: string) => {
 
   const trimmed = raw.trim();
@@ -33,15 +39,7 @@ export const formatPhoneE164 = (raw: string) => {
 
   }
 
-  const digits = trimmed.replace(/\D/g, "");
-
-  if (digits.length === 12 && digits.startsWith("91")) {
-
-    return "+" + digits;
-
-  }
-
-  return "+91" + digits;
+  return "+91" + normalizePhone(trimmed);
 
 };
 
