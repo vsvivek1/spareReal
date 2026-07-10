@@ -99,6 +99,15 @@ export default function ProfilePage() {
             <span className="gx-info-label">Place</span>
             <span className="gx-info-value">{profile?.place || "—"}</span>
           </div>
+
+          <div className="gx-info-row">
+            <span className="gx-info-label">Location</span>
+            <span className="gx-info-value">
+              {profile?.location
+                ? `${profile.location.lat.toFixed(4)}, ${profile.location.lng.toFixed(4)}`
+                : "Not set"}
+            </span>
+          </div>
         </div>
 
         <Link href="/user/edit">

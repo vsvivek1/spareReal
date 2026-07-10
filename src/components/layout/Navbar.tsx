@@ -21,19 +21,41 @@ const publicLinks = [
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/ground", label: "Browse" },
-  { href: "/add-spare", label: "Add Spare" },
   { href: "/my-listings", label: "My Listings" },
-  { href: "/make-request", label: "Request Spare" },
   { href: "/my-requests", label: "My Requests" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/pricing", label: "Pricing" },
   { href: "/user/profile", label: "Profile" },
 ];
 
+// Sell and Request are the two core actions of the marketplace, so
+// they get dedicated, always-visible treatment instead of being just
+// another link in the scrollable nav — twin FABs on the mobile tab
+// bar, twin buttons pinned in the desktop header.
+const primaryActions = [
+  {
+    href: "/add-spare",
+    label: "Sell",
+    icon: <path d="M12 5v14M5 12h14" />,
+  },
+  {
+    href: "/make-request",
+    label: "Request",
+    icon: (
+      <>
+        <path d="M3 10v4a1 1 0 0 0 1 1h2l4 4V5L6 9H4a1 1 0 0 0-1 1Z" />
+        <path d="M15 8a4 4 0 0 1 0 8" />
+        <path d="M18 5a8 8 0 0 1 0 14" />
+      </>
+    ),
+  },
+];
+
 const tabs = [
   {
     href: "/",
     label: "Home",
+    fab: false,
     icon: (
       <path d="M4 11.5 12 4l8 7.5M6 10v9a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-9" />
     ),
@@ -41,6 +63,7 @@ const tabs = [
   {
     href: "/ground",
     label: "Browse",
+    fab: false,
     icon: (
       <>
         <circle cx="11" cy="11" r="6.5" />
@@ -48,17 +71,8 @@ const tabs = [
       </>
     ),
   },
-  {
-    href: "/add-spare",
-    label: "Sell",
-    fab: true,
-    icon: <path d="M12 5v14M5 12h14" />,
-  },
-  {
-    href: "/my-listings",
-    label: "Listings",
-    icon: <path d="M4 6h16M4 12h16M4 18h10" />,
-  },
+  { ...primaryActions[0], fab: true },
+  { ...primaryActions[1], fab: true },
 ];
 
 function TabIcon({ children }: { children: React.ReactNode }) {
@@ -147,6 +161,24 @@ export default function Navbar() {
               </button>
             </nav>
 
+            <div className="gx-primary-actions">
+              <Link
+                href="/add-spare"
+                className="gx-primary-btn gx-primary-btn-sell"
+              >
+                <TabIcon>{primaryActions[0].icon}</TabIcon>
+                Sell
+              </Link>
+
+              <Link
+                href="/make-request"
+                className="gx-primary-btn gx-primary-btn-request"
+              >
+                <TabIcon>{primaryActions[1].icon}</TabIcon>
+                Request
+              </Link>
+            </div>
+
             <button
               type="button"
               className="gx-nav-toggle"
@@ -216,6 +248,24 @@ export default function Navbar() {
               </button>
             </div>
 
+            <div className="gx-drawer-actions">
+              <Link
+                href="/add-spare"
+                className="gx-primary-btn gx-primary-btn-sell"
+              >
+                <TabIcon>{primaryActions[0].icon}</TabIcon>
+                Sell a spare
+              </Link>
+
+              <Link
+                href="/make-request"
+                className="gx-primary-btn gx-primary-btn-request"
+              >
+                <TabIcon>{primaryActions[1].icon}</TabIcon>
+                Request a spare
+              </Link>
+            </div>
+
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -249,7 +299,12 @@ export default function Navbar() {
                 href={tab.href}
                 className="gx-tab-item gx-tab-item-fab"
               >
-                <span className="gx-tab-fab-circle">
+                <span
+                  className={
+                    "gx-tab-fab-circle" +
+                    (tab.label === "Request" ? " gx-tab-fab-circle-alt" : "")
+                  }
+                >
                   <TabIcon>{tab.icon}</TabIcon>
                 </span>
                 {tab.label}

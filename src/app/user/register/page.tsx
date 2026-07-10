@@ -66,6 +66,79 @@ export default function RegisterPage(){
  setPlace] =
  useState("");
 
+ const [location,
+ setLocation] =
+ useState<{ lat:number; lng:number } | null>(null);
+
+ const [locating,
+ setLocating] =
+ useState(false);
+
+ const [locationError,
+ setLocationError] =
+ useState("");
+
+ const handleUseLocation =
+ ()=>{
+
+   setLocationError("");
+
+   if(
+     typeof navigator === "undefined" ||
+     !navigator.geolocation
+   ){
+
+     setLocationError(
+       "Location isn't supported on this device."
+     );
+
+     return;
+
+   }
+
+   setLocating(true);
+
+   navigator.geolocation.getCurrentPosition(
+
+     (position)=>{
+
+       setLocation({
+
+         lat:
+         position.coords.latitude,
+
+         lng:
+         position.coords.longitude
+
+       });
+
+       setLocating(false);
+
+     },
+
+     (geoError)=>{
+
+       setLocationError(
+
+         geoError.code === geoError.PERMISSION_DENIED
+         ? "Location permission denied. You can still register without it."
+         : "Couldn't get your location. Please try again."
+
+       );
+
+       setLocating(false);
+
+     },
+
+     {
+       enableHighAccuracy:true,
+       timeout:10000
+     }
+
+   );
+
+ };
+
  const [roles,
  setRoles] =
  useState<string[]>(["Buyer"]);
@@ -280,6 +353,8 @@ export default function RegisterPage(){
 
          place,
 
+         location,
+
          roles,
 
          isPremium:false,
@@ -488,6 +563,42 @@ setPlace(
  e.target.value
 )}
 />
+</div>
+
+<div className="gx-field">
+<label className="gx-label">Location</label>
+
+<button
+type="button"
+className="gx-btn gx-btn-outline"
+onClick={handleUseLocation}
+disabled={locating}
+>
+{locating && <span className="gx-spinner" />}
+{
+ locating
+ ? "Getting location..."
+ : location
+ ? "📍 Location captured — tap to refresh"
+ : "📍 Use my current location"
+}
+</button>
+
+{
+ location && (
+<p className="gx-location-hint">
+Saved: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+</p>
+ )
+}
+
+{
+ locationError && (
+<p className="gx-location-hint gx-location-hint-error">
+{locationError}
+</p>
+ )
+}
 </div>
 
 <div className="gx-field">

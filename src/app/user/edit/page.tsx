@@ -22,6 +22,12 @@ export default function EditPage() {
   const [district, setDistrict] = useState("");
   const [place, setPlace] = useState("");
 
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState("");
+
   const [roles, setRoles] = useState<string[]>(["Buyer"]);
 
   const toggleRole = (option: string) => {
@@ -29,6 +35,36 @@ export default function EditPage() {
       prev.includes(option)
         ? prev.filter((item) => item !== option)
         : [...prev, option]
+    );
+  };
+
+  const handleUseLocation = () => {
+    setLocationError("");
+
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setLocationError("Location isn't supported on this device.");
+      return;
+    }
+
+    setLocating(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setLocating(false);
+      },
+      (geoError) => {
+        setLocationError(
+          geoError.code === geoError.PERMISSION_DENIED
+            ? "Location permission denied."
+            : "Couldn't get your location. Please try again."
+        );
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
@@ -44,6 +80,7 @@ export default function EditPage() {
         setEmail(data.email || "");
         setDistrict(data.district || "");
         setPlace(data.place || "");
+        setLocation(data.location || null);
         setRoles(data.roles || (data.role ? [data.role] : ["Buyer"]));
       }
 
@@ -65,6 +102,7 @@ export default function EditPage() {
         email,
         district,
         place,
+        location,
         roles,
       });
 
@@ -139,6 +177,36 @@ export default function EditPage() {
               value={place}
               onChange={(e) => setPlace(e.target.value)}
             />
+          </div>
+
+          <div className="gx-field">
+            <label className="gx-label">Location</label>
+
+            <button
+              type="button"
+              className="gx-btn gx-btn-outline"
+              onClick={handleUseLocation}
+              disabled={locating}
+            >
+              {locating && <span className="gx-spinner" />}
+              {locating
+                ? "Getting location..."
+                : location
+                ? "📍 Location saved — tap to refresh"
+                : "📍 Use my current location"}
+            </button>
+
+            {location && (
+              <p className="gx-location-hint">
+                Saved: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+              </p>
+            )}
+
+            {locationError && (
+              <p className="gx-location-hint gx-location-hint-error">
+                {locationError}
+              </p>
+            )}
           </div>
 
           <div className="gx-field">

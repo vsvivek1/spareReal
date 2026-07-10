@@ -1141,8 +1141,75 @@ textarea::placeholder {
   height: 21px;
 }
 
+.gx-tab-fab-circle-alt {
+  background: linear-gradient(120deg, var(--gx-cyan) 0%, var(--gx-indigo) 120%);
+  box-shadow: 0 10px 22px rgba(47, 217, 210, 0.35);
+}
+
+/* desktop: pinned Sell / Request buttons, always visible (not part of
+   the scrollable nav-desktop row) */
+
+.gx-primary-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.gx-primary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 15px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.gx-primary-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.gx-primary-btn-sell {
+  color: white;
+  background: var(--gx-brand-gradient);
+  box-shadow: 0 4px 12px rgba(109, 94, 248, 0.28);
+}
+
+.gx-primary-btn-request {
+  color: var(--gx-text);
+  background: rgba(47, 217, 210, 0.1);
+  border: 1.5px solid rgba(47, 217, 210, 0.45);
+}
+
+.gx-primary-btn-request:hover {
+  background: rgba(47, 217, 210, 0.18);
+}
+
+/* mobile drawer: same two actions, stacked full-width */
+
+.gx-drawer-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.gx-drawer-actions .gx-primary-btn {
+  justify-content: center;
+  padding: 13px 15px;
+  font-size: 14px;
+}
+
 @media (max-width: 860px) {
   .gx-nav-desktop {
+    display: none;
+  }
+
+  .gx-primary-actions {
     display: none;
   }
 
@@ -1308,6 +1375,16 @@ textarea::placeholder {
 
 .gx-form-actions .gx-btn {
   flex: 1;
+}
+
+.gx-location-hint {
+  font-size: 12.5px;
+  color: var(--gx-text-dim);
+  margin: 8px 0 0;
+}
+
+.gx-location-hint-error {
+  color: #ffb4bd;
 }
 
 .gx-page-header-row {
