@@ -54,6 +54,8 @@ export default function HomePage() {
   }, []);
 
   const filteredListings = listings.filter((item) => {
+    const isAvailable = (item.status || "Available") === "Available";
+
     const matchesSearch =
       item.title?.toLowerCase().includes(search.toLowerCase()) ||
       item.vehicle?.toLowerCase().includes(search.toLowerCase());
@@ -61,7 +63,7 @@ export default function HomePage() {
     const matchesCategory = !category || item.category === category;
     const matchesDistrict = !district || item.district === district;
 
-    return matchesSearch && matchesCategory && matchesDistrict;
+    return isAvailable && matchesSearch && matchesCategory && matchesDistrict;
   });
 
   const filteredRequests = requests.filter((item) => {

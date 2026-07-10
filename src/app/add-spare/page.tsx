@@ -28,6 +28,8 @@ export default function AddSparePage() {
   const [category, setCategory] = useState("Engine");
   const [vehicle, setVehicle] = useState("");
   const [price, setPrice] = useState("");
+  const [quantity, setQuantity] = useState("1");
+  const [acquisitionCost, setAcquisitionCost] = useState("");
   const [description, setDescription] = useState("");
   const [condition, setCondition] = useState("Used");
 
@@ -59,6 +61,13 @@ export default function AddSparePage() {
       return;
     }
 
+    const quantityNum = parseInt(quantity, 10);
+
+    if (!Number.isInteger(quantityNum) || quantityNum < 1) {
+      setError("Enter a valid quantity (1 or more).");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -81,8 +90,13 @@ export default function AddSparePage() {
         category,
         vehicle,
         price,
+        quantity: quantityNum,
+        acquisitionCost: acquisitionCost
+          ? parseFloat(acquisitionCost)
+          : null,
         description,
         condition,
+        status: "Available",
         imageUrl,
         sellerId: user.uid,
         sellerPhone: user.phoneNumber,
@@ -93,6 +107,8 @@ export default function AddSparePage() {
       setTitle("");
       setVehicle("");
       setPrice("");
+      setQuantity("1");
+      setAcquisitionCost("");
       setDescription("");
       setCondition("Used");
       setCategory("Engine");
@@ -202,6 +218,30 @@ export default function AddSparePage() {
               placeholder="e.g. 1200"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
+              inputMode="numeric"
+            />
+          </div>
+
+          <div className="gx-field">
+            <label className="gx-label">Quantity in stock</label>
+            <input
+              className="gx-input"
+              placeholder="e.g. 1"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              inputMode="numeric"
+            />
+          </div>
+
+          <div className="gx-field">
+            <label className="gx-label">
+              Acquisition cost (₹, optional)
+            </label>
+            <input
+              className="gx-input"
+              placeholder="What you paid for it — helps track profit"
+              value={acquisitionCost}
+              onChange={(e) => setAcquisitionCost(e.target.value)}
               inputMode="numeric"
             />
           </div>

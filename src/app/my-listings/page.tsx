@@ -17,11 +17,25 @@ import { db } from "@/lib/firebase";
 
 import { useAuth } from "@/contexts/AuthContext";
 
+import {
+  markListingBooked,
+  cancelBooking,
+  confirmSale,
+} from "@/services/listingService";
+
+const statusClass: Record<string, string> = {
+  Available: "gx-status-available",
+  Booked: "gx-status-booked",
+  "Sold Out": "gx-status-soldout",
+};
+
 export default function MyListingsPage() {
   const { user } = useAuth();
 
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionId, setActionId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState("");
 
   const loadListings = async () => {
     try {
@@ -69,6 +83,57 @@ export default function MyListingsPage() {
     }
   };
 
+  const handleMarkBooked = async (id: string) => {
+    setActionError("");
+    setActionId(id);
+
+    try {
+      await markListingBooked(id);
+      await loadListings();
+    } catch (error) {
+      console.log(error);
+      setActionError("Couldn't update this listing. Please try again.");
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleCancelBooking = async (id: string) => {
+    setActionError("");
+    setActionId(id);
+
+    try {
+      await cancelBooking(id);
+      await loadListings();
+    } catch (error) {
+      console.log(error);
+      setActionError("Couldn't update this listing. Please try again.");
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleConfirmSale = async (item: any) => {
+    setActionError("");
+    setActionId(item.id);
+
+    try {
+      await confirmSale({
+        id: item.id,
+        sellerId: item.sellerId,
+        title: item.title,
+        price: item.price,
+        acquisitionCost: item.acquisitionCost,
+      });
+      await loadListings();
+    } catch (error) {
+      console.log(error);
+      setActionError("Couldn't record this sale. Please try again.");
+    } finally {
+      setActionId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="gx-page">
@@ -87,7 +152,7 @@ export default function MyListingsPage() {
           <div>
             <h1 className="gx-dash-title">My Listings</h1>
             <p className="gx-dash-sub">
-              Spare parts you&apos;ve listed for sale.
+              Manage your inventory — stock, bookings, and sales.
             </p>
           </div>
 
@@ -97,6 +162,10 @@ export default function MyListingsPage() {
             </button>
           </Link>
         </div>
+
+        {actionError && (
+          <div className="gx-alert gx-alert-error">{actionError}</div>
+        )}
 
         {listings.length === 0 ? (
           <div className="gx-empty-state">
@@ -117,41 +186,91 @@ export default function MyListingsPage() {
           </div>
         ) : (
           <div className="gx-grid">
-            {listings.map((item) => (
-              <div className="gx-part-card" key={item.id}>
-                <div className="gx-part-image">
-                  <img src={item.imageUrl} alt={item.title} />
-                  {item.condition && (
-                    <span className="gx-badge-pill">{item.condition}</span>
-                  )}
-                </div>
+            {listings.map((item) => {
+              const status = item.status || "Available";
+              const quantity = item.quantity ?? 1;
+              const busy = actionId === item.id;
 
-                <div className="gx-part-body">
-                  <h3 className="gx-part-name">{item.title}</h3>
-                  <p className="gx-part-meta">
-                    {item.vehicle}
-                    {item.category ? ` · ${item.category}` : ""}
-                  </p>
+              return (
+                <div className="gx-part-card" key={item.id}>
+                  <div className="gx-part-image">
+                    <img src={item.imageUrl} alt={item.title} />
+                    {item.condition && (
+                      <span className="gx-badge-pill">{item.condition}</span>
+                    )}
+                  </div>
 
-                  {item.description && (
-                    <p className="gx-part-desc">{item.description}</p>
-                  )}
+                  <div className="gx-part-body">
+                    <h3 className="gx-part-name">{item.title}</h3>
+                    <p className="gx-part-meta">
+                      {item.vehicle}
+                      {item.category ? ` · ${item.category}` : ""}
+                    </p>
 
-                  <p className="gx-part-price">₹{item.price}</p>
+                    {item.description && (
+                      <p className="gx-part-desc">{item.description}</p>
+                    )}
 
-                  <div className="gx-part-actions">
-                    <button className="gx-btn gx-btn-outline">Edit</button>
+                    <p className="gx-part-price">₹{item.price}</p>
 
-                    <button
-                      className="gx-btn gx-btn-danger-outline"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      Delete
-                    </button>
+                    <div className="gx-stock-row">
+                      <span className="gx-stock-qty">
+                        {quantity} in stock
+                      </span>
+
+                      <span
+                        className={
+                          "gx-status-badge " +
+                          (statusClass[status] || "gx-status-available")
+                        }
+                      >
+                        {status}
+                      </span>
+                    </div>
+
+                    <div className="gx-part-actions">
+                      {status === "Available" && (
+                        <button
+                          className="gx-btn gx-btn-outline"
+                          onClick={() => handleMarkBooked(item.id)}
+                          disabled={busy}
+                        >
+                          {busy ? "..." : "Mark as Booked"}
+                        </button>
+                      )}
+
+                      {status === "Booked" && (
+                        <>
+                          <button
+                            className="gx-btn gx-btn-primary"
+                            onClick={() => handleConfirmSale(item)}
+                            disabled={busy}
+                          >
+                            {busy ? "..." : "Confirm Sale"}
+                          </button>
+
+                          <button
+                            className="gx-btn gx-btn-outline"
+                            onClick={() => handleCancelBooking(item.id)}
+                            disabled={busy}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      )}
+
+                      <button
+                        className="gx-btn gx-btn-danger-outline"
+                        onClick={() => handleDelete(item.id)}
+                        disabled={busy}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
