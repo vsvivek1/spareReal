@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import Link from "next/link";
+
 import { collection, getDocs } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
@@ -120,6 +122,11 @@ export default function HomePage() {
             <option>Lighting</option>
             <option>Battery</option>
             <option>Accessories</option>
+            <option>Scrap – Aluminum</option>
+            <option>Scrap – Copper</option>
+            <option>Scrap – Steel</option>
+            <option>Scrap – Mixed Metal</option>
+            <option>Scrap – Other</option>
           </select>
 
           <select
@@ -185,16 +192,26 @@ export default function HomePage() {
                       {item.vehicle}
                       {item.category ? ` · ${item.category}` : ""}
                     </p>
-                    <p className="gx-part-price">₹{item.price}</p>
+                    <p className="gx-part-price">
+                      ₹{item.price}
+                      {item.unitType === "Weight" ? " / kg" : ""}
+                    </p>
+                    {item.unitType === "Weight" && (
+                      <p className="gx-part-meta" style={{ margin: "0 0 8px" }}>
+                        {item.quantity} kg available
+                      </p>
+                    )}
 
                     <span className="gx-district-tag">
                       📍 {item.district || "Unknown District"}
                     </span>
 
                     <div style={{ marginTop: 12 }}>
-                      <button className="gx-btn gx-btn-outline">
-                        View details
-                      </button>
+                      <Link href={`/listing/${item.id}`}>
+                        <button className="gx-btn gx-btn-outline">
+                          View details
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 </div>

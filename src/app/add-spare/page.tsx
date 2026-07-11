@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import imageCompression from "browser-image-compression";
 
@@ -12,8 +12,22 @@ import { storage, db } from "@/lib/firebase";
 
 import { useAuth } from "@/contexts/AuthContext";
 
+import { getUserProfile } from "@/services/userService";
+
 export default function AddSparePage() {
   const { user } = useAuth();
+
+  const [sellerDistrict, setSellerDistrict] = useState("");
+
+  useEffect(() => {
+    const loadDistrict = async () => {
+      if (!user) return;
+      const profile = await getUserProfile(user.uid);
+      setSellerDistrict(profile?.district || "");
+    };
+
+    loadDistrict();
+  }, [user]);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -28,6 +42,7 @@ export default function AddSparePage() {
   const [category, setCategory] = useState("Engine");
   const [vehicle, setVehicle] = useState("");
   const [price, setPrice] = useState("");
+  const [unitType, setUnitType] = useState<"Piece" | "Weight">("Piece");
   const [quantity, setQuantity] = useState("1");
   const [acquisitionCost, setAcquisitionCost] = useState("");
   const [description, setDescription] = useState("");
@@ -61,10 +76,15 @@ export default function AddSparePage() {
       return;
     }
 
-    const quantityNum = parseInt(quantity, 10);
+    const quantityNum =
+      unitType === "Weight" ? parseFloat(quantity) : parseInt(quantity, 10);
 
-    if (!Number.isInteger(quantityNum) || quantityNum < 1) {
-      setError("Enter a valid quantity (1 or more).");
+    if (!Number.isFinite(quantityNum) || quantityNum <= 0) {
+      setError(
+        unitType === "Weight"
+          ? "Enter a valid weight in kg (greater than 0)."
+          : "Enter a valid quantity (1 or more)."
+      );
       return;
     }
 
@@ -90,6 +110,7 @@ export default function AddSparePage() {
         category,
         vehicle,
         price,
+        unitType,
         quantity: quantityNum,
         acquisitionCost: acquisitionCost
           ? parseFloat(acquisitionCost)
@@ -98,6 +119,7 @@ export default function AddSparePage() {
         condition,
         status: "Available",
         imageUrl,
+        district: sellerDistrict || null,
         sellerId: user.uid,
         sellerPhone: user.phoneNumber,
         createdAt: new Date().toISOString(),
@@ -107,6 +129,7 @@ export default function AddSparePage() {
       setTitle("");
       setVehicle("");
       setPrice("");
+      setUnitType("Piece");
       setQuantity("1");
       setAcquisitionCost("");
       setDescription("");
@@ -198,6 +221,11 @@ export default function AddSparePage() {
               <option>Battery</option>
               <option>Oil & Fluids</option>
               <option>Accessories</option>
+              <option>Scrap – Aluminum</option>
+              <option>Scrap – Copper</option>
+              <option>Scrap – Steel</option>
+              <option>Scrap – Mixed Metal</option>
+              <option>Scrap – Other</option>
             </select>
           </div>
 
@@ -212,10 +240,12 @@ export default function AddSparePage() {
           </div>
 
           <div className="gx-field">
-            <label className="gx-label">Price (₹)</label>
+            <label className="gx-label">
+              {unitType === "Weight" ? "Price (₹ per kg)" : "Price (₹)"}
+            </label>
             <input
               className="gx-input"
-              placeholder="e.g. 1200"
+              placeholder={unitType === "Weight" ? "e.g. 45" : "e.g. 1200"}
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               inputMode="numeric"
@@ -223,13 +253,50 @@ export default function AddSparePage() {
           </div>
 
           <div className="gx-field">
-            <label className="gx-label">Quantity in stock</label>
+            <label className="gx-label">Sold by</label>
+            <div className="gx-role-group">
+              <button
+                type="button"
+                className={
+                  "gx-role-option" +
+                  (unitType === "Piece" ? " gx-role-option-active" : "")
+                }
+                onClick={() => {
+                  setUnitType("Piece");
+                  setQuantity("1");
+                }}
+              >
+                Piece
+              </button>
+
+              <button
+                type="button"
+                className={
+                  "gx-role-option" +
+                  (unitType === "Weight" ? " gx-role-option-active" : "")
+                }
+                onClick={() => {
+                  setUnitType("Weight");
+                  setQuantity("");
+                }}
+              >
+                Weight (kg) — for scrap/bulk lots
+              </button>
+            </div>
+          </div>
+
+          <div className="gx-field">
+            <label className="gx-label">
+              {unitType === "Weight"
+                ? "Quantity in stock (kg)"
+                : "Quantity in stock"}
+            </label>
             <input
               className="gx-input"
-              placeholder="e.g. 1"
+              placeholder={unitType === "Weight" ? "e.g. 250" : "e.g. 1"}
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              inputMode="numeric"
+              inputMode="decimal"
             />
           </div>
 

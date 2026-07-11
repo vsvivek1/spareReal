@@ -115,16 +115,45 @@ export default function MyListingsPage() {
 
   const handleConfirmSale = async (item: any) => {
     setActionError("");
+
+    let soldQuantity = 1;
+
+    if (item.unitType === "Weight") {
+      const available = item.quantity ?? 0;
+
+      const input = prompt(
+        `How many kg were sold? (${available} kg available)`,
+        String(available)
+      );
+
+      if (input === null) return;
+
+      soldQuantity = parseFloat(input);
+
+      if (!Number.isFinite(soldQuantity) || soldQuantity <= 0) {
+        setActionError("Enter a valid weight in kg.");
+        return;
+      }
+
+      if (soldQuantity > available) {
+        setActionError("You can't sell more than what's in stock.");
+        return;
+      }
+    }
+
     setActionId(item.id);
 
     try {
-      await confirmSale({
-        id: item.id,
-        sellerId: item.sellerId,
-        title: item.title,
-        price: item.price,
-        acquisitionCost: item.acquisitionCost,
-      });
+      await confirmSale(
+        {
+          id: item.id,
+          sellerId: item.sellerId,
+          title: item.title,
+          price: item.price,
+          acquisitionCost: item.acquisitionCost,
+        },
+        soldQuantity
+      );
       await loadListings();
     } catch (error) {
       console.log(error);
@@ -189,6 +218,7 @@ export default function MyListingsPage() {
             {listings.map((item) => {
               const status = item.status || "Available";
               const quantity = item.quantity ?? 1;
+              const isWeight = item.unitType === "Weight";
               const busy = actionId === item.id;
 
               return (
@@ -211,11 +241,14 @@ export default function MyListingsPage() {
                       <p className="gx-part-desc">{item.description}</p>
                     )}
 
-                    <p className="gx-part-price">₹{item.price}</p>
+                    <p className="gx-part-price">
+                      ₹{item.price}
+                      {isWeight ? " / kg" : ""}
+                    </p>
 
                     <div className="gx-stock-row">
                       <span className="gx-stock-qty">
-                        {quantity} in stock
+                        {quantity} {isWeight ? "kg" : ""} in stock
                       </span>
 
                       <span

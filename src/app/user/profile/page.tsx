@@ -8,11 +8,15 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import { getUserProfile } from "@/services/userService";
 
+import { getSellerReviews } from "@/services/reviewService";
+
 export default function ProfilePage() {
   const { user } = useAuth();
 
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [avgRating, setAvgRating] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -22,6 +26,10 @@ export default function ProfilePage() {
 
       setProfile(data);
       setLoading(false);
+
+      const { average, count } = await getSellerReviews(user.uid);
+      setAvgRating(average);
+      setReviewCount(count);
     };
 
     loadProfile();
@@ -65,6 +73,15 @@ export default function ProfilePage() {
           <div>
             <h2 className="gx-profile-name">{profile?.name || "—"}</h2>
             <p className="gx-profile-meta">{profile?.phone}</p>
+
+            {reviewCount > 0 && (
+              <div className="gx-rating-summary" style={{ marginBottom: 10 }}>
+                ⭐ {avgRating.toFixed(1)}
+                <span className="gx-rating-summary-count">
+                  ({reviewCount} review{reviewCount === 1 ? "" : "s"})
+                </span>
+              </div>
+            )}
 
             <div className="gx-chip-row">
               {roles.map((role) => (

@@ -69,10 +69,14 @@ export default function DashboardPage() {
     );
   }
 
-  const unitsSold = sales.length;
-  const totalRevenue = sales.reduce((sum, sale) => sum + (sale.price || 0), 0);
+  const unitsSold = sales.reduce((sum, sale) => sum + (sale.quantity || 1), 0);
+  const totalRevenue = sales.reduce(
+    (sum, sale) => sum + (sale.totalAmount ?? sale.price ?? 0),
+    0
+  );
   const totalProfit = sales.reduce(
-    (sum, sale) => sum + (sale.price || 0) - (sale.acquisitionCost || 0),
+    (sum, sale) =>
+      sum + (sale.totalAmount ?? sale.price ?? 0) - (sale.totalCost || 0),
     0
   );
 
@@ -141,32 +145,38 @@ export default function DashboardPage() {
               <thead>
                 <tr>
                   <th>Item</th>
-                  <th>Price</th>
+                  <th>Qty</th>
+                  <th>Amount</th>
                   <th>Profit</th>
                   <th>Date</th>
                 </tr>
               </thead>
               <tbody>
-                {sales.map((sale) => (
-                  <tr key={sale.id}>
-                    <td>{sale.title}</td>
-                    <td>₹{(sale.price || 0).toLocaleString("en-IN")}</td>
-                    <td>
-                      {sale.acquisitionCost == null
-                        ? "—"
-                        : `₹${(
-                            (sale.price || 0) - sale.acquisitionCost
-                          ).toLocaleString("en-IN")}`}
-                    </td>
-                    <td>
-                      {new Date(sale.soldAt).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-                  </tr>
-                ))}
+                {sales.map((sale) => {
+                  const amount = sale.totalAmount ?? sale.price ?? 0;
+
+                  return (
+                    <tr key={sale.id}>
+                      <td>{sale.title}</td>
+                      <td>{sale.quantity ?? 1}</td>
+                      <td>₹{amount.toLocaleString("en-IN")}</td>
+                      <td>
+                        {sale.totalCost == null
+                          ? "—"
+                          : `₹${(amount - sale.totalCost).toLocaleString(
+                              "en-IN"
+                            )}`}
+                      </td>
+                      <td>
+                        {new Date(sale.soldAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
