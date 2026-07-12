@@ -208,16 +208,6 @@ export default function Navbar() {
                 </Link>
               ))}
             </nav>
-
-            <div className="gx-public-actions">
-              <Link href="/login" className="gx-btn-ghost">
-                Login
-              </Link>
-
-              <Link href="/login" className="gx-signup-pill">
-                Sign up
-              </Link>
-            </div>
           </>
         )}
       </header>
