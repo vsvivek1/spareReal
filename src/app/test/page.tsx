@@ -6,6 +6,7 @@ import {
   sendOTP,
   verifyOTP
 } from "@/services/authService";
+import { MSG91_CAPTCHA_CONTAINER_ID } from "@/lib/msg91Widget";
 
 export default function LoginPage() {
 
@@ -21,10 +22,6 @@ export default function LoginPage() {
     setLoading] =
     useState(false);
 
-  const [confirmationResult,
-    setConfirmationResult] =
-    useState<any>(null);
-
   const handleSendOTP = async () => {
 
     if (loading)
@@ -34,12 +31,7 @@ export default function LoginPage() {
 
       setLoading(true);
 
-      const result =
-        await sendOTP(phone);
-
-      setConfirmationResult(
-        result
-      );
+      await sendOTP(phone);
 
       alert(
         "OTP sent"
@@ -76,7 +68,7 @@ export default function LoginPage() {
 
       const result =
         await verifyOTP(
-          confirmationResult,
+          phone,
           otp
         );
 
@@ -110,6 +102,8 @@ export default function LoginPage() {
         padding: "30px"
       }}
     >
+
+      <div id={MSG91_CAPTCHA_CONTAINER_ID}></div>
 
       <h1>
         spareX Login
@@ -167,10 +161,6 @@ export default function LoginPage() {
       >
         Verify OTP
       </button>
-
-      <div
-        id="recaptcha-container"
-      ></div>
 
     </div>
 

@@ -259,6 +259,16 @@ export default function RegisterPage(){
 
    }
 
+   if(!phone.trim()){
+
+     setError(
+       "Enter your phone number."
+     );
+
+     return;
+
+   }
+
    const normalizedUsername =
    normalizeUsername(username);
 
@@ -521,8 +531,13 @@ setName(
 <label className="gx-label">Phone</label>
 <input
 className="gx-input"
+placeholder="9496010722"
 value={phone}
-disabled
+disabled={!!user?.phoneNumber}
+onChange={(e)=>
+setPhone(
+ e.target.value
+)}
 />
 </div>
 

@@ -2,10 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { ConfirmationResult } from "firebase/auth";
 import { signOut } from "firebase/auth";
 
-import { sendOTP, verifyOTP, resetPasswordAfterOtp } from "@/services/authService";
+import {
+  sendOTP,
+  verifyOTP,
+  resetPasswordAfterOtp
+} from "@/services/authService";
+import { MSG91_CAPTCHA_CONTAINER_ID } from "@/lib/msg91Widget";
 import { auth } from "@/lib/firebase";
 
 const RESEND_SECONDS = 30;
@@ -23,9 +27,7 @@ export default function ForgotPasswordPage() {
   const [sendingOtp, setSendingOtp] = useState(false);
   const [resendIn, setResendIn] = useState(0);
 
-  const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
-  const [confirmationResult, setConfirmationResult] =
-    useState<ConfirmationResult | null>(null);
+  const [otpDigits, setOtpDigits] = useState(["", "", "", ""]);
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -64,10 +66,9 @@ export default function ForgotPasswordPage() {
 
       setSendingOtp(true);
 
-      const result = await sendOTP(phone);
+      await sendOTP(phone);
 
-      setConfirmationResult(result);
-      setOtpDigits(["", "", "", "", "", ""]);
+      setOtpDigits(["", "", "", ""]);
       setResendIn(RESEND_SECONDS);
       setStep("otp");
 
@@ -101,7 +102,7 @@ export default function ForgotPasswordPage() {
 
     });
 
-    if (value && index < 5) {
+    if (value && index < 3) {
 
       otpInputRefs.current[index + 1]?.focus();
 
@@ -128,9 +129,9 @@ export default function ForgotPasswordPage() {
 
     const otp = otpDigits.join("");
 
-    if (!confirmationResult || otp.length !== 6) {
+    if (otp.length !== 4) {
 
-      setError("Enter the 6-digit code.");
+      setError("Enter the 4-digit code.");
       return;
 
     }
@@ -139,7 +140,7 @@ export default function ForgotPasswordPage() {
 
       setVerifyingOtp(true);
 
-      await verifyOTP(confirmationResult, otp);
+      await verifyOTP(phone, otp);
 
       setStep("password");
 
@@ -209,6 +210,8 @@ export default function ForgotPasswordPage() {
 
     <div className="gx-shell">
 
+      <div id={MSG91_CAPTCHA_CONTAINER_ID}></div>
+
       <div className="gx-card">
 
         <div className="gx-badge">S</div>
@@ -218,7 +221,7 @@ export default function ForgotPasswordPage() {
         <p className="gx-subtitle">
           {step === "phone" &&
             "Enter the phone number linked to your account. We'll text you a code."}
-          {step === "otp" && `Enter the 6-digit code sent to ${phone}.`}
+          {step === "otp" && `Enter the 4-digit code sent to ${phone}.`}
           {step === "password" && "Choose a new password."}
           {step === "done" && "Password updated. Redirecting to login..."}
         </p>
@@ -420,8 +423,6 @@ export default function ForgotPasswordPage() {
           </a>
 
         </div>
-
-        <div id="recaptcha-container"></div>
 
       </div>
 

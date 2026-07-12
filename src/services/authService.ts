@@ -1,17 +1,16 @@
 import {
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
+  signInWithCustomToken,
+  signInWithPopup,
+  GoogleAuthProvider,
   linkWithCredential,
   signInWithEmailAndPassword,
   updatePassword,
-  EmailAuthProvider,
-  ConfirmationResult
+  EmailAuthProvider
 } from "firebase/auth";
 
 import { auth } from "@/lib/firebase";
 import { normalizePhone, getUserByUsername } from "@/services/userService";
-
-let recaptchaVerifier: RecaptchaVerifier | null = null;
+import { sendOtpViaWidget, verifyOtpViaWidget } from "@/lib/msg91Widget";
 
 // Firebase Auth has no native "username" concept, so every phone-verified
 // account is also linked to a synthetic email credential (this address) —
@@ -40,45 +39,6 @@ export const formatPhoneE164 = (raw: string) => {
   }
 
   return "+91" + normalizePhone(trimmed);
-
-};
-
-const resetRecaptcha = () => {
-
-  try {
-
-    recaptchaVerifier?.clear();
-
-  } catch {
-
-    // ignore — element may already be gone
-  }
-
-  recaptchaVerifier = null;
-
-};
-
-const getRecaptcha = () => {
-
-  if (!recaptchaVerifier) {
-
-    recaptchaVerifier = new RecaptchaVerifier(
-      auth,
-      "recaptcha-container",
-      {
-        size: "invisible",
-        callback: () => {},
-        "expired-callback": () => {
-
-          resetRecaptcha();
-
-        }
-      }
-    );
-
-  }
-
-  return recaptchaVerifier;
 
 };
 
@@ -123,7 +83,13 @@ const friendlyAuthError = (error: unknown, fallback: string) => {
       "Sign-in with a password isn't enabled for this app yet. Contact support.",
 
     "auth/requires-recent-login":
-      "Please verify your phone again before changing your password."
+      "Please verify your phone again before changing your password.",
+
+    "auth/invalid-custom-token":
+      "Couldn't verify that code. Please try again.",
+
+    "auth/custom-token-mismatch":
+      "Couldn't verify that code. Please try again."
 
   };
 
@@ -137,51 +103,60 @@ const friendlyAuthError = (error: unknown, fallback: string) => {
 
 };
 
-export const sendOTP = async (
-  phone: string
-): Promise<ConfirmationResult> => {
+// Sending now happens entirely client-side via the MSG91 widget (see
+// src/lib/msg91Widget.ts) — the backend is never involved in this step.
+export const sendOTP = async (phone: string): Promise<void> => {
 
-  const formattedPhone = formatPhoneE164(phone);
+  const identifier = formatPhoneE164(phone).replace("+", "");
 
-  try {
-
-    const verifier = getRecaptcha();
-
-    return await signInWithPhoneNumber(
-      auth,
-      formattedPhone,
-      verifier
-    );
-
-  } catch (error) {
-
-    // A failed attempt can leave the widget in a broken state —
-    // rebuild it so the next "send OTP" tap actually works.
-    resetRecaptcha();
-
-    throw friendlyAuthError(
-      error,
-      "Couldn't send the code. Please try again."
-    );
-
-  }
+  await sendOtpViaWidget(identifier);
 
 };
 
-export const verifyOTP = async (
-  confirmationResult: ConfirmationResult,
-  otp: string
-) => {
+export const verifyOTP = async (phone: string, otp: string) => {
+
+  const accessToken = await verifyOtpViaWidget(otp);
+
+  const response = await fetch("/api/auth/verify-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ phone, accessToken })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+
+    throw new Error(data.error || "Couldn't verify that code. Please try again.");
+
+  }
 
   try {
 
-    return await confirmationResult.confirm(otp);
+    return await signInWithCustomToken(auth, data.customToken);
 
   } catch (error) {
 
     throw friendlyAuthError(
       error,
       "Couldn't verify that code. Please try again."
+    );
+
+  }
+
+};
+
+export const signInWithGoogle = async () => {
+
+  try {
+
+    return await signInWithPopup(auth, new GoogleAuthProvider());
+
+  } catch (error) {
+
+    throw friendlyAuthError(
+      error,
+      "Couldn't sign in with Google. Please try again."
     );
 
   }

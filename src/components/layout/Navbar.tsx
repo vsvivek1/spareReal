@@ -214,7 +214,7 @@ export default function Navbar() {
                 Login
               </Link>
 
-              <Link href="/login?mode=otp" className="gx-signup-pill">
+              <Link href="/login" className="gx-signup-pill">
                 Sign up
               </Link>
             </div>
