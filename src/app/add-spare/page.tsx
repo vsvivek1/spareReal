@@ -30,9 +30,15 @@ export default function AddSparePage() {
   }, [user]);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
+
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraError, setCameraError] = useState("");
+  const [detecting, setDetecting] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -48,6 +54,71 @@ export default function AddSparePage() {
   const [description, setDescription] = useState("");
   const [condition, setCondition] = useState("Used");
 
+  useEffect(() => {
+
+    if (cameraOpen && videoRef.current && streamRef.current) {
+
+      videoRef.current.srcObject = streamRef.current;
+
+    }
+
+  }, [cameraOpen]);
+
+  useEffect(() => {
+
+    return () => {
+
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+
+    };
+
+  }, []);
+
+  const detectSpareFromImage = async (file: File) => {
+
+    setDetecting(true);
+
+    try {
+
+      const dataUrl: string = await new Promise((resolve, reject) => {
+
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+
+      });
+
+      const [prefix, base64] = dataUrl.split(",");
+      const mediaType = prefix.match(/data:(.*);base64/)?.[1] || "image/jpeg";
+
+      const response = await fetch("/api/detect-spare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: base64, mediaType }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+
+        setTitle(data.title);
+        setCategory(data.category);
+
+      }
+
+    } catch (err) {
+
+      console.log(err);
+
+    } finally {
+
+      setDetecting(false);
+
+    }
+
+  };
+
   const handleImage = (e: any) => {
     const file = e.target.files[0];
 
@@ -55,6 +126,77 @@ export default function AddSparePage() {
 
     setImage(file);
     setImagePreview(URL.createObjectURL(file));
+    detectSpareFromImage(file);
+  };
+
+  const handleOpenCamera = async () => {
+
+    setCameraError("");
+
+    try {
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+      });
+
+      streamRef.current = stream;
+      setCameraOpen(true);
+
+    } catch (err) {
+
+      console.log(err);
+      setCameraError("Couldn't access the camera. Check permissions and try again.");
+
+    }
+
+  };
+
+  const handleCloseCamera = () => {
+
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    setCameraOpen(false);
+
+  };
+
+  const handleCapturePhoto = () => {
+
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0);
+
+    canvas.toBlob(
+
+      (blob) => {
+
+        if (!blob) return;
+
+        const file = new File([blob], `spare-${Date.now()}.jpg`, {
+          type: "image/jpeg",
+        });
+
+        setImage(file);
+        setImagePreview(URL.createObjectURL(file));
+        detectSpareFromImage(file);
+        handleCloseCamera();
+
+      },
+
+      "image/jpeg",
+      0.9
+
+    );
+
   };
 
   const handleSubmit = async () => {
@@ -161,6 +303,52 @@ export default function AddSparePage() {
             </div>
           )}
 
+          {cameraOpen && (
+            <div
+              style={{
+                position: "fixed",
+                inset: 0,
+                zIndex: 1000,
+                background: "#000",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                style={{ flex: 1, width: "100%", objectFit: "cover" }}
+              />
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: 16,
+                  padding: 20,
+                }}
+              >
+                <button
+                  type="button"
+                  className="gx-btn gx-btn-outline"
+                  onClick={handleCloseCamera}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="gx-btn gx-btn-primary"
+                  onClick={handleCapturePhoto}
+                >
+                  📷 Capture
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="gx-upload">
             <input
               ref={fileInputRef}
@@ -191,6 +379,27 @@ export default function AddSparePage() {
                   Tap to add a photo
                 </div>
               </div>
+            )}
+
+            <button
+              type="button"
+              className="gx-btn gx-btn-outline"
+              onClick={handleOpenCamera}
+              style={{ marginTop: 10, width: "100%" }}
+            >
+              📷 Open camera
+            </button>
+
+            {cameraError && (
+              <div className="gx-alert gx-alert-error" style={{ marginTop: 10 }}>
+                {cameraError}
+              </div>
+            )}
+
+            {detecting && (
+              <p className="gx-muted" style={{ marginTop: 10 }}>
+                <span className="gx-spinner" /> Identifying the part...
+              </p>
             )}
           </div>
 
