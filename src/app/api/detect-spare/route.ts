@@ -53,9 +53,14 @@ export async function POST(request: Request) {
               category: {
                 type: "string",
                 enum: CATEGORIES
+              },
+              vehicle: {
+                type: "string",
+                description:
+                  "The vehicle make and model this part is most likely from, if the image gives any indication (badging, part shape/design, visible text), e.g. \"Toyota Innova\" or \"Maruti Swift\". Return an empty string if it can't be reasonably inferred — most parts are not vehicle-specific from a photo alone, so leave this empty far more often than not."
               }
             },
-            required: ["title", "category"],
+            required: ["title", "category", "vehicle"],
             additionalProperties: false
           }
         }
@@ -74,7 +79,7 @@ export async function POST(request: Request) {
             },
             {
               type: "text",
-              text: "Identify this used vehicle spare part for a resale listing and pick the best-matching category."
+              text: "Identify this used vehicle spare part for a resale listing, pick the best-matching category, and note the vehicle make/model only if the image actually indicates one."
             }
           ]
         }
@@ -96,7 +101,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       title: result.title,
-      category: result.category
+      category: result.category,
+      vehicle: result.vehicle
     });
 
   } catch (error) {

@@ -105,6 +105,12 @@ export default function AddSparePage() {
         setTitle(data.title);
         setCategory(data.category);
 
+        if (data.vehicle) {
+
+          setVehicle(data.vehicle);
+
+        }
+
       }
 
     } catch (err) {
