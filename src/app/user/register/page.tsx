@@ -52,6 +52,10 @@ export default function RegisterPage(){
  setDistrict] =
  useState("");
 
+ const [state,
+ setState] =
+ useState("");
+
  const [place,
  setPlace] =
  useState("");
@@ -90,17 +94,52 @@ export default function RegisterPage(){
 
    navigator.geolocation.getCurrentPosition(
 
-     (position)=>{
+     async(position)=>{
+
+       const lat =
+       position.coords.latitude;
+
+       const lng =
+       position.coords.longitude;
 
        setLocation({
-
-         lat:
-         position.coords.latitude,
-
-         lng:
-         position.coords.longitude
-
+         lat,
+         lng
        });
+
+       try{
+
+         const response =
+         await fetch(
+           `/api/geocode/reverse?lat=${lat}&lon=${lng}`
+         );
+
+         const data =
+         await response.json();
+
+         if(response.ok){
+
+           if(data.district) setDistrict(data.district);
+           if(data.state) setState(data.state);
+           if(data.place) setPlace(data.place);
+
+         }else{
+
+           setLocationError(
+             "Got your location, but couldn't detect your area — enter district/state/place manually."
+           );
+
+         }
+
+       }catch(geocodeError){
+
+         console.log(geocodeError);
+
+         setLocationError(
+           "Got your location, but couldn't detect your area — enter district/state/place manually."
+         );
+
+       }
 
        setLocating(false);
 
@@ -266,6 +305,8 @@ export default function RegisterPage(){
 
          district,
 
+         state,
+
          place,
 
          location,
@@ -379,32 +420,6 @@ setPhone(
 </div>
 
 <div className="gx-field">
-<label className="gx-label">District</label>
-<input
-className="gx-input"
-placeholder="District"
-value={district}
-onChange={(e)=>
-setDistrict(
- e.target.value
-)}
-/>
-</div>
-
-<div className="gx-field">
-<label className="gx-label">Place</label>
-<input
-className="gx-input"
-placeholder="Place"
-value={place}
-onChange={(e)=>
-setPlace(
- e.target.value
-)}
-/>
-</div>
-
-<div className="gx-field">
 <label className="gx-label">Location</label>
 
 <button
@@ -438,6 +453,45 @@ Saved: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
 </p>
  )
 }
+</div>
+
+<div className="gx-field">
+<label className="gx-label">District</label>
+<input
+className="gx-input"
+placeholder="District"
+value={district}
+onChange={(e)=>
+setDistrict(
+ e.target.value
+)}
+/>
+</div>
+
+<div className="gx-field">
+<label className="gx-label">State</label>
+<input
+className="gx-input"
+placeholder="State"
+value={state}
+onChange={(e)=>
+setState(
+ e.target.value
+)}
+/>
+</div>
+
+<div className="gx-field">
+<label className="gx-label">Place</label>
+<input
+className="gx-input"
+placeholder="Place"
+value={place}
+onChange={(e)=>
+setPlace(
+ e.target.value
+)}
+/>
 </div>
 
 <div className="gx-field">
