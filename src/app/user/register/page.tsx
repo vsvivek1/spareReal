@@ -15,14 +15,8 @@ import {
 
 import {
  getUserProfile,
- saveUserProfile,
- isUsernameTaken,
- normalizeUsername
+ saveUserProfile
 } from "@/services/userService";
-
-import {
- setAccountPassword
-} from "@/services/authService";
 
 export default function RegisterPage(){
 
@@ -52,10 +46,6 @@ export default function RegisterPage(){
 
  const [phone,
  setPhone] =
- useState("");
-
- const [email,
- setEmail] =
  useState("");
 
  const [district,
@@ -158,26 +148,6 @@ export default function RegisterPage(){
 
  };
 
- const [username,
- setUsername] =
- useState("");
-
- const [password,
- setPassword] =
- useState("");
-
- const [confirmPassword,
- setConfirmPassword] =
- useState("");
-
- const [showPassword,
- setShowPassword] =
- useState(false);
-
- const [showConfirmPassword,
- setShowConfirmPassword] =
- useState(false);
-
  // Check auth + existing profile
  useEffect(()=>{
 
@@ -269,44 +239,6 @@ export default function RegisterPage(){
 
    }
 
-   const normalizedUsername =
-   normalizeUsername(username);
-
-   if(
-     normalizedUsername.length < 3 ||
-     !/^[a-z0-9_.]+$/.test(
-       normalizedUsername
-     )
-   ){
-
-     setError(
-       "Username must be at least 3 characters (letters, numbers, . or _ only)."
-     );
-
-     return;
-
-   }
-
-   if(password.length < 6){
-
-     setError(
-       "Password must be at least 6 characters."
-     );
-
-     return;
-
-   }
-
-   if(password !== confirmPassword){
-
-     setError(
-       "Passwords don't match."
-     );
-
-     return;
-
-   }
-
    if(roles.length === 0){
 
      setError(
@@ -321,28 +253,6 @@ export default function RegisterPage(){
 
      setSaving(true);
 
-     const taken =
-     await isUsernameTaken(
-       normalizedUsername
-     );
-
-     if(taken){
-
-       setError(
-         "That username is already taken."
-       );
-
-       setSaving(false);
-
-       return;
-
-     }
-
-     await setAccountPassword(
-       phone,
-       password
-     );
-
      await saveUserProfile(
        user.uid,
        {
@@ -353,11 +263,6 @@ export default function RegisterPage(){
          name,
 
          phone,
-
-         username:
-         normalizedUsername,
-
-         email,
 
          district,
 
@@ -435,7 +340,7 @@ export default function RegisterPage(){
 <h1 className="gx-title">Create your profile</h1>
 
 <p className="gx-subtitle">
-Phone verified. Set up your login and tell us a bit about you.
+Tell us a bit about you to finish setting up your profile.
 </p>
 
 {
@@ -445,74 +350,6 @@ Phone verified. Set up your login and tell us a bit about you.
 </div>
  )
 }
-
-<div className="gx-step-label">Account</div>
-
-<div className="gx-field">
-<label className="gx-label">Username</label>
-<input
-className="gx-input"
-placeholder="yourusername"
-value={username}
-autoCapitalize="none"
-onChange={(e)=>
-setUsername(
- e.target.value
-)}
-/>
-</div>
-
-<div className="gx-field">
-<label className="gx-label">Password</label>
-<div className="gx-input-group">
-<input
-className="gx-input"
-type={showPassword ? "text" : "password"}
-placeholder="At least 6 characters"
-value={password}
-autoComplete="new-password"
-onChange={(e)=>
-setPassword(
- e.target.value
-)}
-/>
-<button
-type="button"
-className="gx-input-icon-btn"
-onClick={() => setShowPassword((v) => !v)}
-aria-label={showPassword ? "Hide password" : "Show password"}
->
-{showPassword ? "🙈" : "👁"}
-</button>
-</div>
-</div>
-
-<div className="gx-field">
-<label className="gx-label">Confirm password</label>
-<div className="gx-input-group">
-<input
-className="gx-input"
-type={showConfirmPassword ? "text" : "password"}
-placeholder="••••••••"
-value={confirmPassword}
-autoComplete="new-password"
-onChange={(e)=>
-setConfirmPassword(
- e.target.value
-)}
-/>
-<button
-type="button"
-className="gx-input-icon-btn"
-onClick={() => setShowConfirmPassword((v) => !v)}
-aria-label={showConfirmPassword ? "Hide password" : "Show password"}
->
-{showConfirmPassword ? "🙈" : "👁"}
-</button>
-</div>
-</div>
-
-<div className="gx-divider">Profile</div>
 
 <div className="gx-field">
 <label className="gx-label">Name</label>
@@ -536,19 +373,6 @@ value={phone}
 disabled={!!user?.phoneNumber}
 onChange={(e)=>
 setPhone(
- e.target.value
-)}
-/>
-</div>
-
-<div className="gx-field">
-<label className="gx-label">Email</label>
-<input
-className="gx-input"
-placeholder="you@example.com"
-value={email}
-onChange={(e)=>
-setEmail(
  e.target.value
 )}
 />
