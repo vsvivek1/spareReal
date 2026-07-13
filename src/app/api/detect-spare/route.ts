@@ -57,7 +57,7 @@ export async function POST(request: Request) {
               vehicle: {
                 type: "string",
                 description:
-                  "The vehicle make and model this part is most likely from, if the image gives any indication (badging, part shape/design, visible text), e.g. \"Toyota Innova\" or \"Maruti Swift\". Return an empty string if it can't be reasonably inferred — most parts are not vehicle-specific from a photo alone, so leave this empty far more often than not."
+                  "The vehicle make and model this part is from, e.g. \"Toyota Innova\" or \"Maruti Swift\". Some part types are commonly model-specific in their visual design even with no text or logo present — headlights, tail lights, bumpers, mirrors, grilles, and body panels often have a shape distinctive enough to identify the vehicle on sight, the way an experienced mechanic would. Actively attempt identification from shape/design for these part types, not just from visible badging or text. For part types that are genuinely generic across vehicles (bolts, hoses, brackets, bearings, belts, small hardware), return an empty string rather than guessing — there's no visual basis to identify a vehicle from those regardless of part type."
               }
             },
             required: ["title", "category", "vehicle"],
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
             },
             {
               type: "text",
-              text: "Identify this used vehicle spare part for a resale listing, pick the best-matching category, and note the vehicle make/model only if the image actually indicates one."
+              text: "Identify this used vehicle spare part for a resale listing and pick the best-matching category. If this is a part type whose design is typically vehicle-specific (e.g. a headlight, tail light, bumper, mirror, grille, or body panel), look closely at its shape and try to identify the exact vehicle make and model it's from, even without any visible text or logo. If it's a generic part type with no vehicle-specific visual design, leave the vehicle field empty."
             }
           ]
         }
