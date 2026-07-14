@@ -8,6 +8,8 @@ import { db } from "@/lib/firebase";
 
 import { useAuth } from "@/contexts/AuthContext";
 
+import { VEHICLE_MAKES } from "@/lib/vehicleMakes";
+
 export default function MakeRequestPage() {
   const { user } = useAuth();
 
@@ -16,6 +18,7 @@ export default function MakeRequestPage() {
   const [success, setSuccess] = useState(false);
 
   const [brand, setBrand] = useState("");
+  const [customBrand, setCustomBrand] = useState("");
   const [model, setModel] = useState("");
   const [year, setYear] = useState("");
   const [sparePart, setSparePart] = useState("");
@@ -40,8 +43,10 @@ export default function MakeRequestPage() {
     try {
       setLoading(true);
 
+      const resolvedBrand = brand === "Other" ? customBrand.trim() : brand;
+
       await addDoc(collection(db, "spareRequests"), {
-        brand,
+        brand: resolvedBrand,
         model,
         year,
         sparePart,
@@ -55,6 +60,7 @@ export default function MakeRequestPage() {
 
       setSuccess(true);
       setBrand("");
+      setCustomBrand("");
       setModel("");
       setYear("");
       setSparePart("");
@@ -99,12 +105,26 @@ export default function MakeRequestPage() {
 
           <div className="gx-field">
             <label className="gx-label">Vehicle brand</label>
-            <input
+            <select
               className="gx-input"
-              placeholder="e.g. Toyota"
               value={brand}
               onChange={(e) => setBrand(e.target.value)}
-            />
+            >
+              <option value="">Select brand</option>
+              {VEHICLE_MAKES.map((m) => (
+                <option key={m}>{m}</option>
+              ))}
+            </select>
+
+            {brand === "Other" && (
+              <input
+                className="gx-input"
+                placeholder="Enter the brand"
+                value={customBrand}
+                onChange={(e) => setCustomBrand(e.target.value)}
+                style={{ marginTop: 8 }}
+              />
+            )}
           </div>
 
           <div className="gx-field">

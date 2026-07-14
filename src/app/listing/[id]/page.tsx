@@ -16,18 +16,12 @@ import { getSellerReviews, submitReview } from "@/services/reviewService";
 
 import { formatVehicleLabel } from "@/lib/vehicleMakes";
 
+import { whatsAppLink } from "@/lib/contact";
+
 const statusClass: Record<string, string> = {
   Available: "gx-status-available",
   Booked: "gx-status-booked",
   "Sold Out": "gx-status-soldout",
-};
-
-const waLink = (phone: string, title: string) => {
-  const digits = (phone || "").replace(/\D/g, "");
-  const text = encodeURIComponent(
-    `Hi, I'm interested in your spareX listing: ${title}`
-  );
-  return `https://wa.me/${digits}?text=${text}`;
 };
 
 function StarRow({
@@ -276,7 +270,10 @@ export default function ListingDetailPage() {
                   </a>
 
                   <a
-                    href={waLink(listing.sellerPhone, listing.title)}
+                    href={whatsAppLink(
+                      listing.sellerPhone,
+                      `Hi, I'm interested in your spareX listing: ${listing.title}`
+                    )}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="gx-btn gx-btn-outline"

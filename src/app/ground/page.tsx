@@ -10,6 +10,8 @@ import { db } from "@/lib/firebase";
 
 import { VEHICLE_MAKES, formatVehicleLabel } from "@/lib/vehicleMakes";
 
+import { whatsAppLink } from "@/lib/contact";
+
 export default function GroundPage() {
   const [activeTab, setActiveTab] = useState("listings");
 
@@ -294,11 +296,28 @@ export default function GroundPage() {
                     <p className="gx-request-desc">{item.description}</p>
                   )}
 
-                  <div style={{ marginTop: 14 }}>
-                    <button className="gx-btn gx-btn-outline">
-                      Contact requester
-                    </button>
-                  </div>
+                  {item.requesterPhone && (
+                    <div className="gx-detail-actions" style={{ marginTop: 14 }}>
+                      <a
+                        href={`tel:${item.requesterPhone}`}
+                        className="gx-btn gx-btn-outline"
+                      >
+                        📞 Call
+                      </a>
+
+                      <a
+                        href={whatsAppLink(
+                          item.requesterPhone,
+                          `Hi, I saw your spareX request for ${item.sparePart}. I might have it.`
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="gx-btn gx-btn-outline"
+                      >
+                        💬 WhatsApp
+                      </a>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
