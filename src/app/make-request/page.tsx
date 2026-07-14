@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { addDoc, collection } from "firebase/firestore";
 
@@ -8,10 +8,24 @@ import { db } from "@/lib/firebase";
 
 import { useAuth } from "@/contexts/AuthContext";
 
+import { getUserProfile } from "@/services/userService";
+
 import { VEHICLE_MAKES } from "@/lib/vehicleMakes";
 
 export default function MakeRequestPage() {
   const { user } = useAuth();
+
+  const [requesterDistrict, setRequesterDistrict] = useState("");
+
+  useEffect(() => {
+    const loadDistrict = async () => {
+      if (!user) return;
+      const profile = await getUserProfile(user.uid);
+      setRequesterDistrict(profile?.district || "");
+    };
+
+    loadDistrict();
+  }, [user]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -53,6 +67,7 @@ export default function MakeRequestPage() {
         description,
         budget,
         condition,
+        district: requesterDistrict || null,
         requesterId: user.uid,
         requesterPhone: user.phoneNumber,
         createdAt: new Date().toISOString(),
