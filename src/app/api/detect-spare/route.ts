@@ -54,13 +54,18 @@ export async function POST(request: Request) {
                 type: "string",
                 enum: CATEGORIES
               },
-              vehicle: {
+              make: {
                 type: "string",
                 description:
-                  "The vehicle make and model this part is from, e.g. \"Toyota Innova\" or \"Maruti Swift\". Some part types are commonly model-specific in their visual design even with no text or logo present — headlights, tail lights, bumpers, mirrors, grilles, and body panels often have a shape distinctive enough to identify the vehicle on sight, the way an experienced mechanic would. Actively attempt identification from shape/design for these part types, not just from visible badging or text. For part types that are genuinely generic across vehicles (bolts, hoses, brackets, bearings, belts, small hardware), return an empty string rather than guessing — there's no visual basis to identify a vehicle from those regardless of part type."
+                  "The vehicle manufacturer this part is from, e.g. \"Toyota\" or \"Maruti Suzuki\". Some part types are commonly model-specific in their visual design even with no text or logo present — headlights, tail lights, bumpers, mirrors, grilles, and body panels often have a shape distinctive enough to identify the vehicle on sight, the way an experienced mechanic would. Actively attempt identification from shape/design for these part types, not just from visible badging or text. For part types that are genuinely generic across vehicles (bolts, hoses, brackets, bearings, belts, small hardware), return an empty string rather than guessing — there's no visual basis to identify a vehicle from those regardless of part type."
+              },
+              model: {
+                type: "string",
+                description:
+                  "The specific model, e.g. \"Innova\" or \"Swift\", following the same identification rules as make. Empty string if make is empty or unknown."
               }
             },
-            required: ["title", "category", "vehicle"],
+            required: ["title", "category", "make", "model"],
             additionalProperties: false
           }
         }
@@ -102,7 +107,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       title: result.title,
       category: result.category,
-      vehicle: result.vehicle
+      make: result.make,
+      model: result.model
     });
 
   } catch (error) {

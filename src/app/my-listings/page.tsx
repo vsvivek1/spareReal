@@ -23,6 +23,8 @@ import {
   confirmSale,
 } from "@/services/listingService";
 
+import { formatVehicleLabel } from "@/lib/vehicleMakes";
+
 const statusClass: Record<string, string> = {
   Available: "gx-status-available",
   Booked: "gx-status-booked",
@@ -233,7 +235,7 @@ export default function MyListingsPage() {
                   <div className="gx-part-body">
                     <h3 className="gx-part-name">{item.title}</h3>
                     <p className="gx-part-meta">
-                      {item.vehicle}
+                      {formatVehicleLabel(item)}
                       {item.category ? ` · ${item.category}` : ""}
                     </p>
 

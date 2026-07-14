@@ -14,6 +14,8 @@ import { getUserProfile } from "@/services/userService";
 
 import { getSellerReviews, submitReview } from "@/services/reviewService";
 
+import { formatVehicleLabel } from "@/lib/vehicleMakes";
+
 const statusClass: Record<string, string> = {
   Available: "gx-status-available",
   Booked: "gx-status-booked",
@@ -221,7 +223,7 @@ export default function ListingDetailPage() {
             <h1 className="gx-detail-title">{listing.title}</h1>
 
             <p className="gx-detail-meta">
-              {listing.vehicle}
+              {formatVehicleLabel(listing)}
               {listing.category ? ` · ${listing.category}` : ""}
               {listing.district ? ` · 📍 ${listing.district}` : ""}
             </p>

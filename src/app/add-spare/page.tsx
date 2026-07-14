@@ -14,6 +14,8 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import { getUserProfile } from "@/services/userService";
 
+import { VEHICLE_MAKES } from "@/lib/vehicleMakes";
+
 export default function AddSparePage() {
   const { user } = useAuth();
 
@@ -46,7 +48,10 @@ export default function AddSparePage() {
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Engine");
-  const [vehicle, setVehicle] = useState("");
+  const [make, setMake] = useState("");
+  const [customMake, setCustomMake] = useState("");
+  const [model, setModel] = useState("");
+  const [year, setYear] = useState("");
   const [price, setPrice] = useState("");
   const [unitType, setUnitType] = useState<"Piece" | "Weight">("Piece");
   const [quantity, setQuantity] = useState("1");
@@ -105,9 +110,20 @@ export default function AddSparePage() {
         setTitle(data.title);
         setCategory(data.category);
 
-        if (data.vehicle) {
+        if (data.make) {
 
-          setVehicle(data.vehicle);
+          if (VEHICLE_MAKES.includes(data.make)) {
+            setMake(data.make);
+          } else {
+            setMake("Other");
+            setCustomMake(data.make);
+          }
+
+        }
+
+        if (data.model) {
+
+          setModel(data.model);
 
         }
 
@@ -236,6 +252,20 @@ export default function AddSparePage() {
       return;
     }
 
+    const currentYear = new Date().getFullYear();
+
+    if (
+      year &&
+      (!/^\d{4}$/.test(year) ||
+        Number(year) < 1980 ||
+        Number(year) > currentYear + 1)
+    ) {
+      setError(`Enter a valid year between 1980 and ${currentYear + 1}.`);
+      return;
+    }
+
+    const resolvedMake = make === "Other" ? customMake.trim() : make;
+
     try {
       setLoading(true);
 
@@ -256,7 +286,9 @@ export default function AddSparePage() {
       await addDoc(collection(db, "spareListings"), {
         title,
         category,
-        vehicle,
+        make: resolvedMake || null,
+        model: model.trim() || null,
+        year: year || null,
         price,
         unitType,
         quantity: quantityNum,
@@ -275,7 +307,10 @@ export default function AddSparePage() {
 
       setSuccess(true);
       setTitle("");
-      setVehicle("");
+      setMake("");
+      setCustomMake("");
+      setModel("");
+      setYear("");
       setPrice("");
       setUnitType("Piece");
       setQuantity("1");
@@ -445,12 +480,47 @@ export default function AddSparePage() {
           </div>
 
           <div className="gx-field">
-            <label className="gx-label">Vehicle</label>
+            <label className="gx-label">Vehicle make</label>
+            <select
+              className="gx-input"
+              value={make}
+              onChange={(e) => setMake(e.target.value)}
+            >
+              <option value="">Select make</option>
+              {VEHICLE_MAKES.map((m) => (
+                <option key={m}>{m}</option>
+              ))}
+            </select>
+
+            {make === "Other" && (
+              <input
+                className="gx-input"
+                placeholder="Enter the make"
+                value={customMake}
+                onChange={(e) => setCustomMake(e.target.value)}
+                style={{ marginTop: 8 }}
+              />
+            )}
+          </div>
+
+          <div className="gx-field">
+            <label className="gx-label">Model</label>
             <input
               className="gx-input"
-              placeholder="e.g. Toyota Innova"
-              value={vehicle}
-              onChange={(e) => setVehicle(e.target.value)}
+              placeholder="e.g. Innova"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+            />
+          </div>
+
+          <div className="gx-field">
+            <label className="gx-label">Year</label>
+            <input
+              className="gx-input"
+              placeholder="e.g. 2018"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              inputMode="numeric"
             />
           </div>
 

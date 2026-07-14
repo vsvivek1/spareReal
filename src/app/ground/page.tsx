@@ -8,6 +8,8 @@ import { collection, getDocs } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
 
+import { VEHICLE_MAKES, formatVehicleLabel } from "@/lib/vehicleMakes";
+
 export default function GroundPage() {
   const [activeTab, setActiveTab] = useState("listings");
 
@@ -18,6 +20,7 @@ export default function GroundPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [district, setDistrict] = useState("");
+  const [make, setMake] = useState("");
 
   useEffect(() => {
     const loadData = async () => {
@@ -58,14 +61,30 @@ export default function GroundPage() {
   const filteredListings = listings.filter((item) => {
     const isAvailable = (item.status || "Available") === "Available";
 
-    const matchesSearch =
-      item.title?.toLowerCase().includes(search.toLowerCase()) ||
-      item.vehicle?.toLowerCase().includes(search.toLowerCase());
+    const searchHaystack = [
+      item.title,
+      item.make,
+      item.model,
+      item.year,
+      item.vehicle,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    const matchesSearch = searchHaystack.includes(search.toLowerCase());
 
     const matchesCategory = !category || item.category === category;
     const matchesDistrict = !district || item.district === district;
+    const matchesMake = !make || item.make === make;
 
-    return isAvailable && matchesSearch && matchesCategory && matchesDistrict;
+    return (
+      isAvailable &&
+      matchesSearch &&
+      matchesCategory &&
+      matchesDistrict &&
+      matchesMake
+    );
   });
 
   const filteredRequests = requests.filter((item) => {
@@ -142,6 +161,17 @@ export default function GroundPage() {
             <option>Ernakulam</option>
             <option>Trivandrum</option>
           </select>
+
+          <select
+            className="gx-input"
+            value={make}
+            onChange={(e) => setMake(e.target.value)}
+          >
+            <option value="">All Makes</option>
+            {VEHICLE_MAKES.map((m) => (
+              <option key={m}>{m}</option>
+            ))}
+          </select>
         </div>
 
         <div className="gx-tabs" style={{ maxWidth: 360 }}>
@@ -190,7 +220,7 @@ export default function GroundPage() {
                   <div className="gx-part-body">
                     <h3 className="gx-part-name">{item.title}</h3>
                     <p className="gx-part-meta">
-                      {item.vehicle}
+                      {formatVehicleLabel(item)}
                       {item.category ? ` · ${item.category}` : ""}
                     </p>
                     <p className="gx-part-price">
