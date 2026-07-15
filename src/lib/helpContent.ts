@@ -7,8 +7,8 @@ export const HELP_SECTIONS: { question: Bilingual; answer: Bilingual }[] = [
       ml: "വിൽക്കാനുള്ള സ്പെയർ പാർട്ട് എങ്ങനെ ലിസ്റ്റ് ചെയ്യാം?",
     },
     answer: {
-      en: "Tap Sell from the menu, add a clear photo of the part (or use the camera — our AI will try to auto-fill the title, category, and vehicle for you), then fill in price, quantity, and condition. If the part came from a vehicle you've registered under My Vehicles, you can link it there so buyers see everything pulled from that car.",
-      ml: "മെനുവിൽ നിന്ന് 'Sell' തിരഞ്ഞെടുക്കുക. സ്പെയർ പാർട്ടിന്റെ വ്യക്തമായ ഫോട്ടോ ചേർക്കുക (ക്യാമറ ഉപയോഗിക്കാം — ടൈറ്റിൽ, കാറ്റഗറി, വാഹനം എന്നിവ എഐ സ്വയമേവ പൂരിപ്പിക്കാൻ ശ്രമിക്കും). വില, എണ്ണം, അവസ്ഥ എന്നിവ നൽകുക. 'My Vehicles'-ൽ നിങ്ങൾ രജിസ്റ്റർ ചെയ്ത വാഹനത്തിൽ നിന്നുള്ള പാർട്ടാണെങ്കിൽ, ആ വാഹനവുമായി ലിങ്ക് ചെയ്യാം — അപ്പോൾ ആ കാറിൽ നിന്ന് ലഭ്യമായ എല്ലാ പാർട്സും വാങ്ങുന്നവർക്ക് ഒരുമിച്ച് കാണാം.",
+      en: "Tap Sell from the menu, add up to 6 photos of the part (or use the camera — our AI will try to auto-fill the title, category, and vehicle from the first photo), then fill in price, quantity, and condition. If the part came from a vehicle you've registered under My Vehicles, you can link it there so buyers see everything pulled from that car. Adding the part number (if you know it) also lets buyers find the same part under other listings.",
+      ml: "മെനുവിൽ നിന്ന് 'Sell' തിരഞ്ഞെടുക്കുക. സ്പെയർ പാർട്ടിന്റെ 6 വരെ ഫോട്ടോകൾ ചേർക്കുക (ക്യാമറ ഉപയോഗിക്കാം — ആദ്യ ഫോട്ടോയിൽ നിന്ന് ടൈറ്റിൽ, കാറ്റഗറി, വാഹനം എന്നിവ എഐ സ്വയമേവ പൂരിപ്പിക്കാൻ ശ്രമിക്കും). വില, എണ്ണം, അവസ്ഥ എന്നിവ നൽകുക. 'My Vehicles'-ൽ നിങ്ങൾ രജിസ്റ്റർ ചെയ്ത വാഹനത്തിൽ നിന്നുള്ള പാർട്ടാണെങ്കിൽ, ആ വാഹനവുമായി ലിങ്ക് ചെയ്യാം — അപ്പോൾ ആ കാറിൽ നിന്ന് ലഭ്യമായ എല്ലാ പാർട്സും വാങ്ങുന്നവർക്ക് ഒരുമിച്ച് കാണാം. പാർട്ട് നമ്പർ അറിയാമെങ്കിൽ അതും ചേർക്കുക — ഇത് മറ്റ് ലിസ്റ്റിംഗുകളിൽ ഉള്ള അതേ പാർട്ട് കണ്ടെത്താൻ വാങ്ങുന്നവരെ സഹായിക്കും.",
     },
   },
   {
@@ -37,8 +37,8 @@ export const HELP_SECTIONS: { question: Bilingual; answer: Bilingual }[] = [
       ml: "പാർട്സ് എങ്ങനെ ബ്രൗസ് ചെയ്യാം, തിരയാം?",
     },
     answer: {
-      en: "Go to Browse to see every listing and request in one feed. Use the search box plus the Category, District, and Make filters to narrow things down — search also matches make, model, and year, so typing a model name works even without picking it from the filter.",
-      ml: "എല്ലാ ലിസ്റ്റിംഗുകളും റിക്വസ്റ്റുകളും ഒരുമിച്ച് കാണാൻ 'Browse' എന്നതിലേക്ക് പോകുക. തിരയൽ ബോക്സും Category, District, Make ഫിൽട്ടറുകളും ഉപയോഗിച്ച് ഫലങ്ങൾ ചുരുക്കാം — മോഡൽ പേര് ടൈപ്പ് ചെയ്താലും തിരയൽ അത് കണ്ടെത്തും, ഫിൽട്ടറിൽ നിന്ന് പ്രത്യേകം തിരഞ്ഞെടുക്കേണ്ട ആവശ്യമില്ല.",
+      en: "Go to Browse to see every listing and request in one feed. Use the search box plus the Category, District, Make, and Year filters to narrow things down — search also matches make, model, year, and part number, so typing any of those works even without picking it from a filter. Add a min/max price to only see listings in your budget, and use Sort to order results by newest or price.",
+      ml: "എല്ലാ ലിസ്റ്റിംഗുകളും റിക്വസ്റ്റുകളും ഒരുമിച്ച് കാണാൻ 'Browse' എന്നതിലേക്ക് പോകുക. തിരയൽ ബോക്സും Category, District, Make, Year ഫിൽട്ടറുകളും ഉപയോഗിച്ച് ഫലങ്ങൾ ചുരുക്കാം — മോഡൽ, വർഷം, പാർട്ട് നമ്പർ എന്നിവ ടൈപ്പ് ചെയ്താലും തിരയൽ അത് കണ്ടെത്തും, ഫിൽട്ടറിൽ നിന്ന് പ്രത്യേകം തിരഞ്ഞെടുക്കേണ്ട ആവശ്യമില്ല. നിങ്ങളുടെ ബഡ്ജറ്റിലുള്ള ലിസ്റ്റിംഗുകൾ മാത്രം കാണാൻ മിനിമം/മാക്സിമം വില നൽകാം, ഫലങ്ങൾ പുതിയത് അല്ലെങ്കിൽ വില അനുസരിച്ച് ക്രമീകരിക്കാൻ Sort ഉപയോഗിക്കുക.",
     },
   },
   {
@@ -96,8 +96,8 @@ export const HELP_SECTIONS: { question: Bilingual; answer: Bilingual }[] = [
 export const FIELD_HINTS = {
   addSpare: {
     photo: {
-      en: "Add a clear photo — our AI will try to auto-fill the title, category, and vehicle.",
-      ml: "വ്യക്തമായ ഫോട്ടോ ചേർക്കുക — ടൈറ്റിൽ, കാറ്റഗറി, വാഹനം എന്നിവ എഐ സ്വയമേവ പൂരിപ്പിക്കാൻ ശ്രമിക്കും.",
+      en: "Add up to 6 photos — our AI will try to auto-fill the title, category, and vehicle from the first one.",
+      ml: "6 വരെ ഫോട്ടോകൾ ചേർക്കുക — ആദ്യ ഫോട്ടോയിൽ നിന്ന് ടൈറ്റിൽ, കാറ്റഗറി, വാഹനം എന്നിവ എഐ സ്വയമേവ പൂരിപ്പിക്കാൻ ശ്രമിക്കും.",
     },
     vehicleLink: {
       en: "Already registered the donor vehicle? Link it here so buyers see every part from the same car.",
