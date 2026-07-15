@@ -23,6 +23,12 @@ export default function GroundPage() {
   const [category, setCategory] = useState("");
   const [district, setDistrict] = useState("");
   const [make, setMake] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [year, setYear] = useState("");
+  const [sortBy, setSortBy] = useState<"newest" | "priceLow" | "priceHigh">(
+    "newest"
+  );
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,35 +66,52 @@ export default function GroundPage() {
     loadData();
   }, []);
 
-  const filteredListings = listings.filter((item) => {
-    const isAvailable = (item.status || "Available") === "Available";
+  const filteredListings = listings
+    .filter((item) => {
+      const isAvailable = (item.status || "Available") === "Available";
 
-    const searchHaystack = [
-      item.title,
-      item.make,
-      item.model,
-      item.year,
-      item.vehicle,
-      item.partNumber,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
+      const searchHaystack = [
+        item.title,
+        item.make,
+        item.model,
+        item.year,
+        item.vehicle,
+        item.partNumber,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
 
-    const matchesSearch = searchHaystack.includes(search.toLowerCase());
+      const matchesSearch = searchHaystack.includes(search.toLowerCase());
 
-    const matchesCategory = !category || item.category === category;
-    const matchesDistrict = !district || item.district === district;
-    const matchesMake = !make || item.make === make;
+      const matchesCategory = !category || item.category === category;
+      const matchesDistrict = !district || item.district === district;
+      const matchesMake = !make || item.make === make;
+      const matchesYear = !year || String(item.year) === year;
 
-    return (
-      isAvailable &&
-      matchesSearch &&
-      matchesCategory &&
-      matchesDistrict &&
-      matchesMake
-    );
-  });
+      const price = Number(item.price);
+      const matchesMinPrice = !minPrice || price >= Number(minPrice);
+      const matchesMaxPrice = !maxPrice || price <= Number(maxPrice);
+
+      return (
+        isAvailable &&
+        matchesSearch &&
+        matchesCategory &&
+        matchesDistrict &&
+        matchesMake &&
+        matchesYear &&
+        matchesMinPrice &&
+        matchesMaxPrice
+      );
+    })
+    .sort((a, b) => {
+      if (sortBy === "priceLow") return Number(a.price) - Number(b.price);
+      if (sortBy === "priceHigh") return Number(b.price) - Number(a.price);
+      return (
+        new Date(b.createdAt || 0).getTime() -
+        new Date(a.createdAt || 0).getTime()
+      );
+    });
 
   const filteredRequests = requests.filter((item) => {
     const matchesSearch =
@@ -174,6 +197,40 @@ export default function GroundPage() {
             {VEHICLE_MAKES.map((m) => (
               <option key={m}>{m}</option>
             ))}
+          </select>
+
+          <input
+            className="gx-input"
+            placeholder="Year"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            inputMode="numeric"
+          />
+
+          <input
+            className="gx-input"
+            placeholder="Min price (₹)"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            inputMode="numeric"
+          />
+
+          <input
+            className="gx-input"
+            placeholder="Max price (₹)"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            inputMode="numeric"
+          />
+
+          <select
+            className="gx-input"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+          >
+            <option value="newest">Newest first</option>
+            <option value="priceLow">Price: Low to High</option>
+            <option value="priceHigh">Price: High to Low</option>
           </select>
         </div>
 
