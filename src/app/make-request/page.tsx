@@ -12,6 +12,10 @@ import { getUserProfile } from "@/services/userService";
 
 import { VEHICLE_MAKES } from "@/lib/vehicleMakes";
 
+import { FIELD_HINTS } from "@/lib/helpContent";
+
+import HelpHint from "@/components/HelpHint";
+
 export default function MakeRequestPage() {
   const { user } = useAuth();
 
@@ -140,6 +144,8 @@ export default function MakeRequestPage() {
                 style={{ marginTop: 8 }}
               />
             )}
+
+            <HelpHint text={FIELD_HINTS.makeRequest.vehicleInfo} />
           </div>
 
           <div className="gx-field">
@@ -171,6 +177,7 @@ export default function MakeRequestPage() {
               onChange={(e) => setBudget(e.target.value)}
               inputMode="numeric"
             />
+            <HelpHint text={FIELD_HINTS.makeRequest.budget} />
           </div>
 
           <div className="gx-field">

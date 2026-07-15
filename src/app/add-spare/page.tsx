@@ -20,6 +20,10 @@ import { getUserVehicles } from "@/services/vehicleService";
 
 import { VEHICLE_MAKES, formatVehicleLabel } from "@/lib/vehicleMakes";
 
+import { FIELD_HINTS } from "@/lib/helpContent";
+
+import HelpHint from "@/components/HelpHint";
+
 export default function AddSparePage() {
   const { user } = useAuth();
 
@@ -436,6 +440,8 @@ export default function AddSparePage() {
               style={{ display: "none" }}
             />
 
+            <HelpHint text={FIELD_HINTS.addSpare.photo} />
+
             {imagePreview ? (
               <div className="gx-upload-preview">
                 <img src={imagePreview} alt="Preview" />
@@ -530,6 +536,8 @@ export default function AddSparePage() {
                 </option>
               ))}
             </select>
+
+            <HelpHint text={FIELD_HINTS.addSpare.vehicleLink} />
 
             {vehicles.length === 0 && (
               <p className="gx-muted" style={{ marginTop: 8 }}>
@@ -657,6 +665,7 @@ export default function AddSparePage() {
               onChange={(e) => setAcquisitionCost(e.target.value)}
               inputMode="numeric"
             />
+            <HelpHint text={FIELD_HINTS.addSpare.acquisitionCost} />
           </div>
 
           <div className="gx-field">

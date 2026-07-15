@@ -12,6 +12,10 @@ import {
  AuthProvider
 } from "@/contexts/AuthContext";
 
+import {
+ LanguageProvider
+} from "@/contexts/LanguageContext";
+
 export const metadata: Metadata = {
  title: "spareX",
  description:
@@ -48,12 +52,14 @@ export default function RootLayout({
 
 <body>
 
+<LanguageProvider>
 <AuthProvider>
   <Navbar/>
 
 {children}
 
 </AuthProvider>
+</LanguageProvider>
 
 </body>
 

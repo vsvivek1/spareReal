@@ -18,6 +18,10 @@ import { getUserProfile } from "@/services/userService";
 
 import { VEHICLE_MAKES } from "@/lib/vehicleMakes";
 
+import { FIELD_HINTS } from "@/lib/helpContent";
+
+import HelpHint from "@/components/HelpHint";
+
 const MAX_PHOTOS = 8;
 
 const ACQUISITION_REASONS = [
@@ -240,9 +244,10 @@ export default function AddVehiclePage() {
             />
 
             <p className="gx-muted" style={{ marginTop: 8 }}>
-              {photos.length}/{MAX_PHOTOS} photos — front, rear, sides,
-              engine bay help buyers trust the listing.
+              {photos.length}/{MAX_PHOTOS} photos
             </p>
+
+            <HelpHint text={FIELD_HINTS.addVehicle.photos} />
           </div>
 
           <div className="gx-field">
@@ -294,10 +299,11 @@ export default function AddVehiclePage() {
             <label className="gx-label">VIN / chassis number (optional)</label>
             <input
               className="gx-input"
-              placeholder="For future part-matching accuracy"
+              placeholder="e.g. MA3ERLF1S00123456"
               value={vin}
               onChange={(e) => setVin(e.target.value)}
             />
+            <HelpHint text={FIELD_HINTS.addVehicle.vin} />
           </div>
 
           <div className="gx-field">
@@ -332,6 +338,7 @@ export default function AddVehiclePage() {
                 <option key={reason}>{reason}</option>
               ))}
             </select>
+            <HelpHint text={FIELD_HINTS.addVehicle.acquisitionReason} />
           </div>
 
           <button

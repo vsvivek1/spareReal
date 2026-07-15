@@ -16,6 +16,7 @@ const publicLinks = [
   { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
+  { href: "/help", label: "Help" },
 ];
 
 const navLinks = [
@@ -26,6 +27,7 @@ const navLinks = [
   { href: "/my-requests", label: "My Requests" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/help", label: "Help" },
   { href: "/user/profile", label: "Profile" },
 ];
 

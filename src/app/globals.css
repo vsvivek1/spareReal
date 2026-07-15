@@ -395,6 +395,19 @@ textarea::placeholder {
   color: var(--gx-text-dim);
 }
 
+.gx-hint {
+  color: var(--gx-text-dim);
+  font-size: 12.5px;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.gx-lang-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
 .gx-alert {
   display: flex;
   gap: 8px;
