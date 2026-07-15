@@ -72,6 +72,7 @@ export default function AddSparePage() {
   const [customMake, setCustomMake] = useState("");
   const [model, setModel] = useState("");
   const [year, setYear] = useState("");
+  const [partNumber, setPartNumber] = useState("");
   const [price, setPrice] = useState("");
   const [unitType, setUnitType] = useState<"Piece" | "Weight">("Piece");
   const [quantity, setQuantity] = useState("1");
@@ -328,6 +329,7 @@ export default function AddSparePage() {
         make: resolvedMake || null,
         model: model.trim() || null,
         year: year || null,
+        partNumber: partNumber.trim().toUpperCase() || null,
         vehicleId: vehicleId || null,
         price,
         unitType,
@@ -352,6 +354,7 @@ export default function AddSparePage() {
       setCustomMake("");
       setModel("");
       setYear("");
+      setPartNumber("");
       setPrice("");
       setUnitType("Piece");
       setQuantity("1");
@@ -591,6 +594,17 @@ export default function AddSparePage() {
               onChange={(e) => setYear(e.target.value)}
               inputMode="numeric"
             />
+          </div>
+
+          <div className="gx-field">
+            <label className="gx-label">Part number (optional)</label>
+            <input
+              className="gx-input"
+              placeholder="e.g. 04465-0K190"
+              value={partNumber}
+              onChange={(e) => setPartNumber(e.target.value)}
+            />
+            <HelpHint text={FIELD_HINTS.addSpare.partNumber} />
           </div>
 
           <div className="gx-field">

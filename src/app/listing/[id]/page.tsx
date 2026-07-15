@@ -16,6 +16,8 @@ import { getUserProfile } from "@/services/userService";
 
 import { getSellerReviews, submitReview } from "@/services/reviewService";
 
+import { getListingsByPartNumber } from "@/services/listingService";
+
 import { formatVehicleLabel } from "@/lib/vehicleMakes";
 
 import { whatsAppLink } from "@/lib/contact";
@@ -72,6 +74,8 @@ export default function ListingDetailPage() {
   const [reviewError, setReviewError] = useState("");
   const [reviewSuccess, setReviewSuccess] = useState(false);
 
+  const [interchangeListings, setInterchangeListings] = useState<any[]>([]);
+
   const loadReviews = async (sellerId: string) => {
     const { reviews, average, count } = await getSellerReviews(sellerId);
     setReviews(reviews);
@@ -94,6 +98,18 @@ export default function ListingDetailPage() {
 
         // Reviews failing to load should never hide the listing itself.
         loadReviews(data.sellerId);
+
+        if (data.partNumber) {
+          const others = await getListingsByPartNumber(
+            data.partNumber,
+            data.id
+          );
+          setInterchangeListings(
+            others.filter(
+              (item: any) => (item.status || "Available") === "Available"
+            )
+          );
+        }
       } catch (error) {
         console.log(error);
         setNotFound(true);
@@ -222,6 +238,7 @@ export default function ListingDetailPage() {
               {formatVehicleLabel(listing)}
               {listing.category ? ` · ${listing.category}` : ""}
               {listing.district ? ` · 📍 ${listing.district}` : ""}
+              {listing.partNumber ? ` · Part No. ${listing.partNumber}` : ""}
             </p>
 
             {listing.vehicleId && (
@@ -304,6 +321,49 @@ export default function ListingDetailPage() {
             </div>
           </div>
         </div>
+
+        {interchangeListings.length > 0 && (
+          <div className="gx-review-section">
+            <div className="gx-section-head">
+              <h2 className="gx-section-title">
+                Also available under part number {listing.partNumber}
+              </h2>
+            </div>
+
+            <div className="gx-grid">
+              {interchangeListings.map((item) => (
+                <div className="gx-part-card" key={item.id}>
+                  <div className="gx-part-image">
+                    <img src={item.imageUrl} alt={item.title} />
+                    {item.condition && (
+                      <span className="gx-badge-pill">{item.condition}</span>
+                    )}
+                  </div>
+
+                  <div className="gx-part-body">
+                    <h3 className="gx-part-name">{item.title}</h3>
+                    <p className="gx-part-meta">
+                      {formatVehicleLabel(item)}
+                      {item.district ? ` · 📍 ${item.district}` : ""}
+                    </p>
+                    <p className="gx-part-price">
+                      ₹{item.price}
+                      {item.unitType === "Weight" ? " / kg" : ""}
+                    </p>
+
+                    <div style={{ marginTop: 12 }}>
+                      <Link href={`/listing/${item.id}`}>
+                        <button className="gx-btn gx-btn-outline">
+                          View details
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="gx-review-section">
           <div className="gx-section-head">

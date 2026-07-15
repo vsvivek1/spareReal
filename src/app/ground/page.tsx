@@ -69,6 +69,7 @@ export default function GroundPage() {
       item.model,
       item.year,
       item.vehicle,
+      item.partNumber,
     ]
       .filter(Boolean)
       .join(" ")

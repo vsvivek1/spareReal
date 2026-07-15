@@ -23,6 +23,16 @@ export const HELP_SECTIONS: { question: Bilingual; answer: Bilingual }[] = [
   },
   {
     question: {
+      en: "What is the part number field for?",
+      ml: "പാർട്ട് നമ്പർ ഫീൽഡ് എന്തിനാണ്?",
+    },
+    answer: {
+      en: "If you know the OEM or aftermarket part number printed on the part, add it when listing. Any other listing with the exact same part number will show up on each other's page as an interchangeable option — useful since the same part is often sold under different vehicle names.",
+      ml: "പാർട്ടിൽ പ്രിന്റ് ചെയ്തിട്ടുള്ള OEM അല്ലെങ്കിൽ ആഫ്റ്റർമാർക്കറ്റ് പാർട്ട് നമ്പർ അറിയാമെങ്കിൽ ലിസ്റ്റ് ചെയ്യുമ്പോൾ അത് ചേർക്കുക. അതേ പാർട്ട് നമ്പർ ഉള്ള മറ്റ് ലിസ്റ്റിംഗുകൾ പരസ്പരം പേജിൽ പരസ്പരം മാറ്റി ഉപയോഗിക്കാവുന്ന ഓപ്ഷനായി കാണിക്കും — ഒരേ പാർട്ട് പലപ്പോഴും വ്യത്യസ്ത വാഹന പേരുകളിൽ വിൽക്കപ്പെടാറുള്ളതിനാൽ ഇത് ഉപകാരപ്രദമാണ്.",
+    },
+  },
+  {
+    question: {
       en: "How do I browse and search for parts?",
       ml: "പാർട്സ് എങ്ങനെ ബ്രൗസ് ചെയ്യാം, തിരയാം?",
     },
@@ -96,6 +106,10 @@ export const FIELD_HINTS = {
     acquisitionCost: {
       en: "What you paid for this part — used only to calculate your profit on the Dashboard, buyers never see it.",
       ml: "ഈ പാർട്ടിന് നിങ്ങൾ നൽകിയ വില — Dashboard-ൽ ലാഭം കണക്കാക്കാൻ മാത്രം ഉപയോഗിക്കുന്നു, വാങ്ങുന്നവർ ഇത് കാണില്ല.",
+    },
+    partNumber: {
+      en: "If another listing has the exact same part number, buyers will see both as interchangeable.",
+      ml: "ഇതേ പാർട്ട് നമ്പർ വേറൊരു ലിസ്റ്റിംഗിലും ഉണ്ടെങ്കിൽ, രണ്ടും പരസ്പരം മാറ്റി ഉപയോഗിക്കാവുന്നതായി വാങ്ങുന്നവർക്ക് കാണാം.",
     },
   },
   makeRequest: {

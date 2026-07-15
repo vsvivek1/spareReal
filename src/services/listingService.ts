@@ -1,11 +1,39 @@
 import {
   collection,
   doc,
+  getDocs,
+  query,
   runTransaction,
   updateDoc,
+  where,
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+
+// Lightweight interchange: listings that share the exact same
+// normalized part number are treated as the same physical part, even
+// if their make/model/vehicle text differs — the mechanism real
+// interchange databases (Car-Part.com) use, minus an external OEM
+// cross-reference dataset we don't have.
+export const getListingsByPartNumber = async (
+  partNumber: string,
+  excludeId: string
+) => {
+  const normalized = partNumber.trim().toUpperCase();
+
+  if (!normalized) return [];
+
+  const q = query(
+    collection(db, "spareListings"),
+    where("partNumber", "==", normalized)
+  );
+
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs
+    .filter((docSnap) => docSnap.id !== excludeId)
+    .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+};
 
 export const markListingBooked = async (listingId: string) => {
   await updateDoc(doc(db, "spareListings", listingId), {
