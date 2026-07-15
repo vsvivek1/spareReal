@@ -1828,6 +1828,11 @@ textarea::placeholder {
   display: block;
 }
 
+.gx-photo-thumb-active {
+  outline: 2px solid rgba(109, 94, 248, 0.9);
+  outline-offset: 2px;
+}
+
 .gx-photo-thumb-remove {
   position: absolute;
   top: 6px;

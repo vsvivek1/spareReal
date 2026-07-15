@@ -24,6 +24,8 @@ import { FIELD_HINTS } from "@/lib/helpContent";
 
 import HelpHint from "@/components/HelpHint";
 
+const MAX_PHOTOS = 6;
+
 export default function AddSparePage() {
   const { user } = useAuth();
 
@@ -55,8 +57,8 @@ export default function AddSparePage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState("");
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
 
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState("");
@@ -162,14 +164,31 @@ export default function AddSparePage() {
 
   };
 
-  const handleImage = (e: any) => {
-    const file = e.target.files[0];
+  const handleAddPhotos = (e: any) => {
+    const files: File[] = Array.from(e.target.files || []);
 
-    if (!file) return;
+    if (!files.length) return;
 
-    setImage(file);
-    setImagePreview(URL.createObjectURL(file));
-    detectSpareFromImage(file);
+    const wasEmpty = photos.length === 0;
+    const remainingSlots = MAX_PHOTOS - photos.length;
+    const accepted = files.slice(0, remainingSlots);
+
+    setPhotos((prev) => [...prev, ...accepted]);
+    setPhotoPreviews((prev) => [
+      ...prev,
+      ...accepted.map((file) => URL.createObjectURL(file)),
+    ]);
+
+    if (wasEmpty && accepted[0]) {
+      detectSpareFromImage(accepted[0]);
+    }
+
+    e.target.value = "";
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPhotoPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSelectVehicle = (id: string) => {
@@ -227,6 +246,11 @@ export default function AddSparePage() {
 
     if (!video) return;
 
+    if (photos.length >= MAX_PHOTOS) {
+      handleCloseCamera();
+      return;
+    }
+
     const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -236,6 +260,8 @@ export default function AddSparePage() {
     if (!ctx) return;
 
     ctx.drawImage(video, 0, 0);
+
+    const wasEmpty = photos.length === 0;
 
     canvas.toBlob(
 
@@ -247,9 +273,13 @@ export default function AddSparePage() {
           type: "image/jpeg",
         });
 
-        setImage(file);
-        setImagePreview(URL.createObjectURL(file));
-        detectSpareFromImage(file);
+        setPhotos((prev) => [...prev, file]);
+        setPhotoPreviews((prev) => [...prev, URL.createObjectURL(file)]);
+
+        if (wasEmpty) {
+          detectSpareFromImage(file);
+        }
+
         handleCloseCamera();
 
       },
@@ -270,8 +300,8 @@ export default function AddSparePage() {
       return;
     }
 
-    if (!image) {
-      setError("Select a photo for your listing.");
+    if (photos.length === 0) {
+      setError("Add at least one photo for your listing.");
       return;
     }
 
@@ -309,19 +339,21 @@ export default function AddSparePage() {
     try {
       setLoading(true);
 
-      const compressedFile = await imageCompression(image, {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1200,
-        useWebWorker: true,
-      });
+      const photoUrls: string[] = [];
 
-      const fileName = `spare-images/${user.uid}_${Date.now()}.jpg`;
+      for (let i = 0; i < photos.length; i++) {
+        const compressedFile = await imageCompression(photos[i], {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1200,
+          useWebWorker: true,
+        });
 
-      const storageRef = ref(storage, fileName);
+        const fileName = `spare-images/${user.uid}_${Date.now()}_${i}.jpg`;
+        const storageRef = ref(storage, fileName);
 
-      await uploadBytes(storageRef, compressedFile);
-
-      const imageUrl = await getDownloadURL(storageRef);
+        await uploadBytes(storageRef, compressedFile);
+        photoUrls.push(await getDownloadURL(storageRef));
+      }
 
       await addDoc(collection(db, "spareListings"), {
         title,
@@ -340,7 +372,8 @@ export default function AddSparePage() {
         description,
         condition,
         status: "Available",
-        imageUrl,
+        imageUrl: photoUrls[0],
+        photos: photoUrls,
         district: sellerDistrict || null,
         sellerId: user.uid,
         sellerPhone: user.phoneNumber,
@@ -362,8 +395,8 @@ export default function AddSparePage() {
       setDescription("");
       setCondition("Used");
       setCategory("Engine");
-      setImage(null);
-      setImagePreview("");
+      setPhotos([]);
+      setPhotoPreviews([]);
     } catch (error) {
       console.log(error);
       setError("Upload failed. Please try again.");
@@ -439,34 +472,42 @@ export default function AddSparePage() {
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              onChange={handleImage}
+              multiple
+              onChange={handleAddPhotos}
               style={{ display: "none" }}
             />
 
             <HelpHint text={FIELD_HINTS.addSpare.photo} />
 
-            {imagePreview ? (
-              <div className="gx-upload-preview">
-                <img src={imagePreview} alt="Preview" />
-                <button
-                  type="button"
-                  className="gx-upload-preview-change"
+            <div className="gx-photo-grid" style={{ marginTop: 10 }}>
+              {photoPreviews.map((src, index) => (
+                <div className="gx-photo-thumb" key={src}>
+                  <img src={src} alt={`Photo ${index + 1}`} />
+                  <button
+                    type="button"
+                    className="gx-photo-thumb-remove"
+                    onClick={() => handleRemovePhoto(index)}
+                    aria-label="Remove photo"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+
+              {photos.length < MAX_PHOTOS && (
+                <div
+                  className="gx-upload-box gx-photo-add"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  Change photo
-                </button>
-              </div>
-            ) : (
-              <div
-                className="gx-upload-box"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <div className="gx-upload-box-icon">📷</div>
-                <div className="gx-upload-box-text">
-                  Tap to add a photo
+                  <div className="gx-upload-box-icon">📷</div>
+                  <div className="gx-upload-box-text">Add photo</div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
+
+            <p className="gx-muted" style={{ marginTop: 8 }}>
+              {photos.length}/{MAX_PHOTOS} photos
+            </p>
 
             <button
               type="button"

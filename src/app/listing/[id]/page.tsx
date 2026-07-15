@@ -63,6 +63,7 @@ export default function ListingDetailPage() {
   const [listing, setListing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [activePhoto, setActivePhoto] = useState(0);
 
   const [reviews, setReviews] = useState<any[]>([]);
   const [avgRating, setAvgRating] = useState(0);
@@ -203,6 +204,11 @@ export default function ListingDetailPage() {
   const quantity = listing.quantity ?? 1;
   const isOwnListing = user?.uid === listing.sellerId;
 
+  const photos: string[] =
+    listing.photos?.length > 0
+      ? listing.photos
+      : [listing.imageUrl].filter(Boolean);
+
   return (
     <div className="gx-page">
       <div className="gx-container" style={{ maxWidth: 920 }}>
@@ -215,10 +221,33 @@ export default function ListingDetailPage() {
         </button>
 
         <div className="gx-detail-grid">
-          <div className="gx-detail-image">
-            <img src={listing.imageUrl} alt={listing.title} />
-            {listing.condition && (
-              <span className="gx-badge-pill">{listing.condition}</span>
+          <div>
+            <div className="gx-detail-image">
+              <img
+                src={photos[activePhoto] || listing.imageUrl}
+                alt={listing.title}
+              />
+              {listing.condition && (
+                <span className="gx-badge-pill">{listing.condition}</span>
+              )}
+            </div>
+
+            {photos.length > 1 && (
+              <div className="gx-photo-grid" style={{ marginTop: 10 }}>
+                {photos.map((src, index) => (
+                  <div
+                    className={
+                      "gx-photo-thumb" +
+                      (index === activePhoto ? " gx-photo-thumb-active" : "")
+                    }
+                    key={src}
+                    onClick={() => setActivePhoto(index)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <img src={src} alt={`${listing.title} photo ${index + 1}`} />
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
