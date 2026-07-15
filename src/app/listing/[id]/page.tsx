@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 import { useParams, useRouter } from "next/navigation";
 
+import Link from "next/link";
+
 import { doc, getDoc } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
@@ -221,6 +223,16 @@ export default function ListingDetailPage() {
               {listing.category ? ` · ${listing.category}` : ""}
               {listing.district ? ` · 📍 ${listing.district}` : ""}
             </p>
+
+            {listing.vehicleId && (
+              <Link
+                href={`/vehicle/${listing.vehicleId}`}
+                className="gx-location-hint"
+                style={{ display: "inline-block", marginBottom: 14 }}
+              >
+                See other parts from this vehicle →
+              </Link>
+            )}
 
             <p className="gx-detail-price">
               ₹{listing.price}

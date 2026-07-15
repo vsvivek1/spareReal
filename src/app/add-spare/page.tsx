@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import Link from "next/link";
+
 import imageCompression from "browser-image-compression";
 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -14,7 +16,9 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import { getUserProfile } from "@/services/userService";
 
-import { VEHICLE_MAKES } from "@/lib/vehicleMakes";
+import { getUserVehicles } from "@/services/vehicleService";
+
+import { VEHICLE_MAKES, formatVehicleLabel } from "@/lib/vehicleMakes";
 
 export default function AddSparePage() {
   const { user } = useAuth();
@@ -29,6 +33,18 @@ export default function AddSparePage() {
     };
 
     loadDistrict();
+  }, [user]);
+
+  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [vehicleId, setVehicleId] = useState("");
+
+  useEffect(() => {
+    const loadVehicles = async () => {
+      if (!user) return;
+      setVehicles(await getUserVehicles(user.uid));
+    };
+
+    loadVehicles();
   }, [user]);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -149,6 +165,25 @@ export default function AddSparePage() {
     setImage(file);
     setImagePreview(URL.createObjectURL(file));
     detectSpareFromImage(file);
+  };
+
+  const handleSelectVehicle = (id: string) => {
+    setVehicleId(id);
+
+    const vehicle = vehicles.find((v) => v.id === id);
+
+    if (!vehicle) return;
+
+    if (VEHICLE_MAKES.includes(vehicle.make)) {
+      setMake(vehicle.make);
+      setCustomMake("");
+    } else {
+      setMake("Other");
+      setCustomMake(vehicle.make || "");
+    }
+
+    setModel(vehicle.model || "");
+    setYear(vehicle.year || "");
   };
 
   const handleOpenCamera = async () => {
@@ -289,6 +324,7 @@ export default function AddSparePage() {
         make: resolvedMake || null,
         model: model.trim() || null,
         year: year || null,
+        vehicleId: vehicleId || null,
         price,
         unitType,
         quantity: quantityNum,
@@ -307,6 +343,7 @@ export default function AddSparePage() {
 
       setSuccess(true);
       setTitle("");
+      setVehicleId("");
       setMake("");
       setCustomMake("");
       setModel("");
@@ -477,6 +514,30 @@ export default function AddSparePage() {
               <option>Scrap – Mixed Metal</option>
               <option>Scrap – Other</option>
             </select>
+          </div>
+
+          <div className="gx-field">
+            <label className="gx-label">Link to a vehicle (optional)</label>
+            <select
+              className="gx-input"
+              value={vehicleId}
+              onChange={(e) => handleSelectVehicle(e.target.value)}
+            >
+              <option value="">— None, sell independently —</option>
+              {vehicles.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {formatVehicleLabel(v)}
+                </option>
+              ))}
+            </select>
+
+            {vehicles.length === 0 && (
+              <p className="gx-muted" style={{ marginTop: 8 }}>
+                No vehicles registered yet.{" "}
+                <Link href="/add-vehicle">Add one</Link> to group parts
+                pulled from the same car.
+              </p>
+            )}
           </div>
 
           <div className="gx-field">

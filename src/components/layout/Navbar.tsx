@@ -22,6 +22,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/ground", label: "Browse" },
   { href: "/my-listings", label: "My Listings" },
+  { href: "/my-vehicles", label: "My Vehicles" },
   { href: "/my-requests", label: "My Requests" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/pricing", label: "Pricing" },
