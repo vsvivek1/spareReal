@@ -24,10 +24,13 @@ import { FIELD_HINTS } from "@/lib/helpContent";
 
 import HelpHint from "@/components/HelpHint";
 
+import { useLanguage } from "@/contexts/LanguageContext";
+
 const MAX_PHOTOS = 6;
 
 export default function AddSparePage() {
   const { user } = useAuth();
+  const { lang } = useLanguage();
 
   const [sellerDistrict, setSellerDistrict] = useState("");
 
@@ -64,6 +67,11 @@ export default function AddSparePage() {
   const [cameraError, setCameraError] = useState("");
   const [detecting, setDetecting] = useState(false);
 
+  const recognitionRef = useRef<any>(null);
+  const [listening, setListening] = useState(false);
+  const [parsingVoice, setParsingVoice] = useState(false);
+  const [voiceError, setVoiceError] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -97,6 +105,7 @@ export default function AddSparePage() {
     return () => {
 
       streamRef.current?.getTracks().forEach((track) => track.stop());
+      recognitionRef.current?.stop();
 
     };
 
@@ -162,6 +171,99 @@ export default function AddSparePage() {
 
     }
 
+  };
+
+  const applyVoiceFields = (data: any) => {
+    if (data.title) setTitle(data.title);
+    if (data.category) setCategory(data.category);
+
+    if (data.make) {
+      if (VEHICLE_MAKES.includes(data.make)) {
+        setMake(data.make);
+        setCustomMake("");
+      } else {
+        setMake("Other");
+        setCustomMake(data.make);
+      }
+    }
+
+    if (data.model) setModel(data.model);
+    if (data.year) setYear(data.year);
+    if (data.partNumber) setPartNumber(data.partNumber);
+    if (data.quantity) setQuantity(String(data.quantity));
+  };
+
+  const parseVoiceTranscript = async (transcript: string) => {
+    setParsingVoice(true);
+
+    try {
+
+      const response = await fetch("/api/parse-voice-entry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setVoiceError(data.error || "Couldn't understand that. Please fill in manually.");
+        return;
+      }
+
+      applyVoiceFields(data);
+
+    } catch (err) {
+
+      console.log(err);
+      setVoiceError("Couldn't understand that. Please fill in manually.");
+
+    } finally {
+
+      setParsingVoice(false);
+
+    }
+  };
+
+  const handleVoiceEntry = () => {
+    setVoiceError("");
+
+    if (listening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setVoiceError(
+        "Voice entry isn't supported in this browser. Try Chrome on Android."
+      );
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = lang === "ml" ? "ml-IN" : "en-IN";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => setListening(true);
+
+    recognition.onerror = () => {
+      setListening(false);
+      setVoiceError("Couldn't hear that. Please try again.");
+    };
+
+    recognition.onend = () => setListening(false);
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      parseVoiceTranscript(transcript);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
   };
 
   const handleAddPhotos = (e: any) => {
@@ -420,6 +522,33 @@ export default function AddSparePage() {
               Listing added successfully.
             </div>
           )}
+
+          <div className="gx-field">
+            <button
+              type="button"
+              className={
+                "gx-btn " + (listening ? "gx-btn-primary" : "gx-btn-outline")
+              }
+              onClick={handleVoiceEntry}
+              disabled={parsingVoice}
+              style={{ width: "100%" }}
+            >
+              {parsingVoice && <span className="gx-spinner" />}
+              {listening
+                ? "🎙️ Listening... tap to stop"
+                : parsingVoice
+                ? "Filling in details..."
+                : "🎤 Speak part, vehicle, count"}
+            </button>
+
+            <HelpHint text={FIELD_HINTS.addSpare.voiceEntry} />
+
+            {voiceError && (
+              <div className="gx-alert gx-alert-error" style={{ marginTop: 10 }}>
+                {voiceError}
+              </div>
+            )}
+          </div>
 
           {cameraOpen && (
             <div

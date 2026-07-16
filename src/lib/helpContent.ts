@@ -7,8 +7,8 @@ export const HELP_SECTIONS: { question: Bilingual; answer: Bilingual }[] = [
       ml: "വിൽക്കാനുള്ള സ്പെയർ പാർട്ട് എങ്ങനെ ലിസ്റ്റ് ചെയ്യാം?",
     },
     answer: {
-      en: "Tap Sell from the menu, add up to 6 photos of the part (or use the camera — our AI will try to auto-fill the title, category, and vehicle from the first photo), then fill in price, quantity, and condition. If the part came from a vehicle you've registered under My Vehicles, you can link it there so buyers see everything pulled from that car. Adding the part number (if you know it) also lets buyers find the same part under other listings.",
-      ml: "മെനുവിൽ നിന്ന് 'Sell' തിരഞ്ഞെടുക്കുക. സ്പെയർ പാർട്ടിന്റെ 6 വരെ ഫോട്ടോകൾ ചേർക്കുക (ക്യാമറ ഉപയോഗിക്കാം — ആദ്യ ഫോട്ടോയിൽ നിന്ന് ടൈറ്റിൽ, കാറ്റഗറി, വാഹനം എന്നിവ എഐ സ്വയമേവ പൂരിപ്പിക്കാൻ ശ്രമിക്കും). വില, എണ്ണം, അവസ്ഥ എന്നിവ നൽകുക. 'My Vehicles'-ൽ നിങ്ങൾ രജിസ്റ്റർ ചെയ്ത വാഹനത്തിൽ നിന്നുള്ള പാർട്ടാണെങ്കിൽ, ആ വാഹനവുമായി ലിങ്ക് ചെയ്യാം — അപ്പോൾ ആ കാറിൽ നിന്ന് ലഭ്യമായ എല്ലാ പാർട്സും വാങ്ങുന്നവർക്ക് ഒരുമിച്ച് കാണാം. പാർട്ട് നമ്പർ അറിയാമെങ്കിൽ അതും ചേർക്കുക — ഇത് മറ്റ് ലിസ്റ്റിംഗുകളിൽ ഉള്ള അതേ പാർട്ട് കണ്ടെത്താൻ വാങ്ങുന്നവരെ സഹായിക്കും.",
+      en: "Tap Sell from the menu. You can tap the 🎤 Speak button and just say the part, vehicle make/model, and how many you have (English or Malayalam) to auto-fill the form, or add up to 6 photos (our AI will try to auto-fill the title, category, and vehicle from the first one). Then fill in price, quantity, and condition. If the part came from a vehicle you've registered under My Vehicles, you can link it there so buyers see everything pulled from that car. Adding the part number (if you know it) also lets buyers find the same part under other listings.",
+      ml: "മെനുവിൽ നിന്ന് 'Sell' തിരഞ്ഞെടുക്കുക. 🎤 Speak ബട്ടൺ അമർത്തി പാർട്ട്, വാഹനത്തിന്റെ മേക്ക്/മോഡൽ, എണ്ണം എന്നിവ പറഞ്ഞാൽ (ഇംഗ്ലീഷ് അല്ലെങ്കിൽ മലയാളം) ഫോം സ്വയമേവ പൂരിപ്പിക്കും, അല്ലെങ്കിൽ 6 വരെ ഫോട്ടോകൾ ചേർക്കാം (ആദ്യ ഫോട്ടോയിൽ നിന്ന് ടൈറ്റിൽ, കാറ്റഗറി, വാഹനം എന്നിവ എഐ സ്വയമേവ പൂരിപ്പിക്കാൻ ശ്രമിക്കും). വില, എണ്ണം, അവസ്ഥ എന്നിവ നൽകുക. 'My Vehicles'-ൽ നിങ്ങൾ രജിസ്റ്റർ ചെയ്ത വാഹനത്തിൽ നിന്നുള്ള പാർട്ടാണെങ്കിൽ, ആ വാഹനവുമായി ലിങ്ക് ചെയ്യാം — അപ്പോൾ ആ കാറിൽ നിന്ന് ലഭ്യമായ എല്ലാ പാർട്സും വാങ്ങുന്നവർക്ക് ഒരുമിച്ച് കാണാം. പാർട്ട് നമ്പർ അറിയാമെങ്കിൽ അതും ചേർക്കുക — ഇത് മറ്റ് ലിസ്റ്റിംഗുകളിൽ ഉള്ള അതേ പാർട്ട് കണ്ടെത്താൻ വാങ്ങുന്നവരെ സഹായിക്കും.",
     },
   },
   {
@@ -98,6 +98,10 @@ export const FIELD_HINTS = {
     photo: {
       en: "Add up to 6 photos — our AI will try to auto-fill the title, category, and vehicle from the first one.",
       ml: "6 വരെ ഫോട്ടോകൾ ചേർക്കുക — ആദ്യ ഫോട്ടോയിൽ നിന്ന് ടൈറ്റിൽ, കാറ്റഗറി, വാഹനം എന്നിവ എഐ സ്വയമേവ പൂരിപ്പിക്കാൻ ശ്രമിക്കും.",
+    },
+    voiceEntry: {
+      en: "Tap and just say the part, vehicle make/model, and how many you have — in English or Malayalam. Everything it fills in stays editable.",
+      ml: "ബട്ടൺ അമർത്തി പാർട്ട്, വാഹനത്തിന്റെ മേക്ക്/മോഡൽ, എണ്ണം എന്നിവ പറയുക — ഇംഗ്ലീഷിലോ മലയാളത്തിലോ ആകാം. ഇത് പൂരിപ്പിക്കുന്നതെല്ലാം പിന്നീട് തിരുത്താം.",
     },
     vehicleLink: {
       en: "Already registered the donor vehicle? Link it here so buyers see every part from the same car.",
