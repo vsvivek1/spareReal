@@ -24,7 +24,7 @@ import { FIELD_HINTS } from "@/lib/helpContent";
 
 import HelpHint from "@/components/HelpHint";
 
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
 
 const MAX_PHOTOS = 6;
 
@@ -244,7 +244,8 @@ export default function AddSparePage() {
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = lang === "ml" ? "ml-IN" : "en-IN";
+    recognition.lang =
+      LANGUAGES.find((l) => l.code === lang)?.speechLocale || "en-IN";
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 

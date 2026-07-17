@@ -2,10 +2,10 @@
 
 import { useLanguage } from "@/contexts/LanguageContext";
 
-import type { Bilingual } from "@/lib/helpContent";
+import type { Translated } from "@/lib/helpContent";
 
-export default function HelpHint({ text }: { text: Bilingual }) {
+export default function HelpHint({ text }: { text: Translated }) {
   const { lang } = useLanguage();
 
-  return <p className="gx-hint">{lang === "ml" ? text.ml : text.en}</p>;
+  return <p className="gx-hint">{text[lang]}</p>;
 }
