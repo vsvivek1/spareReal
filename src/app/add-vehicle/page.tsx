@@ -56,6 +56,7 @@ export default function AddVehiclePage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  const [vehicleType, setVehicleType] = useState<"Scrap" | "Personal">("Scrap");
   const [make, setMake] = useState("");
   const [customMake, setCustomMake] = useState("");
   const [model, setModel] = useState("");
@@ -150,22 +151,24 @@ export default function AddVehiclePage() {
       }
 
       await addDoc(collection(db, "vehicles"), {
+        vehicleType,
         make: resolvedMake,
         model: model.trim(),
         year: year || null,
         vin: vin.trim() || null,
         color: color.trim() || null,
         odometer: odometer ? Number(odometer) : null,
-        acquisitionReason,
+        acquisitionReason: vehicleType === "Scrap" ? acquisitionReason : null,
         photos: photoUrls,
         district: sellerDistrict || null,
-        status: "Parting Out",
+        status: vehicleType === "Scrap" ? "Parting Out" : "In Use",
         sellerId: user.uid,
         sellerPhone: user.phoneNumber,
         createdAt: new Date().toISOString(),
       });
 
       setSuccess(true);
+      setVehicleType("Scrap");
       setMake("");
       setCustomMake("");
       setModel("");
@@ -177,7 +180,7 @@ export default function AddVehiclePage() {
       setPhotos([]);
       setPhotoPreviews([]);
 
-      router.push("/my-vehicles");
+      router.push("/my-account?tab=vehicles");
     } catch (error) {
       console.log(error);
       setError("Couldn't save this vehicle. Please try again.");
@@ -192,8 +195,8 @@ export default function AddVehiclePage() {
         <div className="gx-page-header">
           <h1 className="gx-dash-title">Add Vehicle</h1>
           <p className="gx-dash-sub">
-            Register a dismantled vehicle so every part you list from it can
-            be grouped together for buyers.
+            Register a vehicle you&apos;re parting out for sale, or one you
+            just use — keep both in one place.
           </p>
         </div>
 
@@ -204,6 +207,33 @@ export default function AddVehiclePage() {
               Vehicle added. You can now link parts to it from Add Spare.
             </div>
           )}
+
+          <div className="gx-field">
+            <label className="gx-label">What is this vehicle for?</label>
+            <div className="gx-role-group">
+              <button
+                type="button"
+                className={
+                  "gx-role-option" +
+                  (vehicleType === "Scrap" ? " gx-role-option-active" : "")
+                }
+                onClick={() => setVehicleType("Scrap")}
+              >
+                Scrap — parting out for sale
+              </button>
+
+              <button
+                type="button"
+                className={
+                  "gx-role-option" +
+                  (vehicleType === "Personal" ? " gx-role-option-active" : "")
+                }
+                onClick={() => setVehicleType("Personal")}
+              >
+                My own vehicle (in use)
+              </button>
+            </div>
+          </div>
 
           <div className="gx-field">
             <label className="gx-label">Photos</label>
@@ -327,19 +357,21 @@ export default function AddVehiclePage() {
             />
           </div>
 
-          <div className="gx-field">
-            <label className="gx-label">Why it's being parted out</label>
-            <select
-              className="gx-input"
-              value={acquisitionReason}
-              onChange={(e) => setAcquisitionReason(e.target.value)}
-            >
-              {ACQUISITION_REASONS.map((reason) => (
-                <option key={reason}>{reason}</option>
-              ))}
-            </select>
-            <HelpHint text={FIELD_HINTS.addVehicle.acquisitionReason} />
-          </div>
+          {vehicleType === "Scrap" && (
+            <div className="gx-field">
+              <label className="gx-label">Why it's being parted out</label>
+              <select
+                className="gx-input"
+                value={acquisitionReason}
+                onChange={(e) => setAcquisitionReason(e.target.value)}
+              >
+                {ACQUISITION_REASONS.map((reason) => (
+                  <option key={reason}>{reason}</option>
+                ))}
+              </select>
+              <HelpHint text={FIELD_HINTS.addVehicle.acquisitionReason} />
+            </div>
+          )}
 
           <button
             type="button"

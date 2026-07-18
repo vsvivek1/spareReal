@@ -47,6 +47,10 @@ export default function AddSparePage() {
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [vehicleId, setVehicleId] = useState("");
 
+  // Personal (in-use) vehicles aren't a parts source, so only offer
+  // scrap vehicles for linking a listing to.
+  const scrapVehicles = vehicles.filter((v) => v.vehicleType !== "Personal");
+
   useEffect(() => {
     const loadVehicles = async () => {
       if (!user) return;
@@ -704,7 +708,7 @@ export default function AddSparePage() {
               onChange={(e) => handleSelectVehicle(e.target.value)}
             >
               <option value="">— None, sell independently —</option>
-              {vehicles.map((v) => (
+              {scrapVehicles.map((v) => (
                 <option key={v.id} value={v.id}>
                   {formatVehicleLabel(v)}
                 </option>
@@ -713,7 +717,7 @@ export default function AddSparePage() {
 
             <HelpHint text={FIELD_HINTS.addSpare.vehicleLink} />
 
-            {vehicles.length === 0 && (
+            {scrapVehicles.length === 0 && (
               <p className="gx-muted" style={{ marginTop: 8 }}>
                 No vehicles registered yet.{" "}
                 <Link href="/add-vehicle">Add one</Link> to group parts

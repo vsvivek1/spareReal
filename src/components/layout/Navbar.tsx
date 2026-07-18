@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const publicLinks = [
   { href: "/", label: "Home" },
+  { href: "/workshops", label: "Workshops" },
   { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -22,9 +23,8 @@ const publicLinks = [
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/ground", label: "Browse" },
-  { href: "/my-listings", label: "My Listings" },
-  { href: "/my-vehicles", label: "My Vehicles" },
-  { href: "/my-requests", label: "My Requests" },
+  { href: "/my-account", label: "My Account" },
+  { href: "/workshops", label: "Workshops" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/pricing", label: "Pricing" },
   { href: "/help", label: "Help" },
