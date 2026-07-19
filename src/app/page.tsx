@@ -4,9 +4,17 @@ import { useEffect, useState } from "react";
 
 import Link from "next/link";
 
+import { collection, getDocs } from "firebase/firestore";
+
+import { db } from "@/lib/firebase";
+
 import { useAuth } from "@/contexts/AuthContext";
 
 import { getUserProfile } from "@/services/userService";
+
+import { getServicesByType } from "@/services/workshopService";
+
+import { formatVehicleLabel } from "@/lib/vehicleMakes";
 
 const features = [
   {
@@ -21,8 +29,8 @@ const features = [
   },
   {
     icon: "🛠️",
-    title: "Trusted workshops",
-    text: "Book service at rated garages without leaving the app.",
+    title: "Trusted services",
+    text: "Find rated workshops, washing, painting, tyre service and more.",
   },
   {
     icon: "⚡",
@@ -31,77 +39,15 @@ const features = [
   },
 ];
 
-const spareParts = [
-  {
-    name: "Brake Pad",
-    image:
-      "https://images.unsplash.com/photo-1487754180451-c456f719a1fc?q=80&w=1200&auto=format&fit=crop",
-    vehicle: "Toyota Innova",
-    price: 1200,
-  },
-  {
-    name: "Battery",
-    image:
-      "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?q=80&w=1200&auto=format&fit=crop",
-    vehicle: "Swift",
-    price: 4500,
-  },
-  {
-    name: "Engine Oil",
-    image:
-      "https://images.unsplash.com/photo-1635764706066-8e47cfb8d78b?q=80&w=1200&auto=format&fit=crop",
-    vehicle: "Hyundai i20",
-    price: 900,
-  },
-  {
-    name: "Headlight",
-    image:
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1200&auto=format&fit=crop",
-    vehicle: "Fortuner",
-    price: 3200,
-  },
-  {
-    name: "Tyre",
-    image:
-      "https://images.unsplash.com/photo-1486006920555-c77dcf18193c?q=80&w=1200&auto=format&fit=crop",
-    vehicle: "Baleno",
-    price: 5800,
-  },
-  {
-    name: "Suspension",
-    image:
-      "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1200&auto=format&fit=crop",
-    vehicle: "Honda City",
-    price: 7600,
-  },
-];
-
-const workshops = [
-  {
-    name: "AutoFix Workshop",
-    image:
-      "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=1200&auto=format&fit=crop",
-    rating: "4.5",
-  },
-  {
-    name: "City Garage",
-    image:
-      "https://images.unsplash.com/photo-1517524206127-48bbd363f3d7?q=80&w=1200&auto=format&fit=crop",
-    rating: "4.2",
-  },
-  {
-    name: "Premium Motors",
-    image:
-      "https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?q=80&w=1200&auto=format&fit=crop",
-    rating: "4.8",
-  },
-];
-
 export default function HomePage() {
   const { user, loading } = useAuth();
 
   const [profile, setProfile] = useState<any>(null);
   const [checkingProfile, setCheckingProfile] = useState(true);
+
+  const [listings, setListings] = useState<any[]>([]);
+  const [nearbyWorkshops, setNearbyWorkshops] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -120,6 +66,56 @@ export default function HomePage() {
       loadProfile();
     }
   }, [user, loading]);
+
+  // Real listings + nearby services for the logged-in home feed.
+  useEffect(() => {
+    const loadFeed = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "spareListings"));
+
+        const items: any[] = [];
+        snapshot.forEach((doc) => items.push({ id: doc.id, ...doc.data() }));
+
+        setListings(items);
+      } catch (error) {
+        console.log(error);
+      }
+
+      try {
+        setNearbyWorkshops((await getServicesByType("workshop")).slice(0, 3));
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    if (user) loadFeed();
+  }, [user]);
+
+  const newListings = listings
+    .filter((item) => {
+      const isAvailable = (item.status || "Available") === "Available";
+
+      const haystack = [
+        item.title,
+        item.make,
+        item.model,
+        item.year,
+        item.vehicle,
+        item.partNumber,
+        item.category,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return isAvailable && haystack.includes(search.toLowerCase());
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt || 0).getTime() -
+        new Date(a.createdAt || 0).getTime()
+    )
+    .slice(0, 8);
 
   if (loading || checkingProfile) {
     return (
@@ -147,8 +143,8 @@ export default function HomePage() {
 
           <p className="gx-hero-subtitle">
             spareX connects you with verified sellers of second-hand vehicle
-            parts and trusted workshops, so you can find the right part, at
-            the right price, near you.
+            parts and trusted services, so you can find the right part, at the
+            right price, near you.
           </p>
 
           <div className="gx-hero-actions">
@@ -196,9 +192,7 @@ export default function HomePage() {
             </p>
 
             <Link href="/user/register">
-              <button className="gx-btn gx-btn-primary">
-                Create profile
-              </button>
+              <button className="gx-btn gx-btn-primary">Create profile</button>
             </Link>
           </div>
         </div>
@@ -241,62 +235,112 @@ export default function HomePage() {
           </div>
         </div>
 
-        <input className="gx-search" placeholder="Search spare parts..." />
+        <input
+          className="gx-search"
+          placeholder="Search spare parts..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
         <div className="gx-section-head">
-          <h2 className="gx-section-title">Latest spare parts</h2>
+          <h2 className="gx-section-title">New listings</h2>
           <Link href="/ground" className="gx-section-link">
             View all
           </Link>
         </div>
 
-        <div className="gx-grid">
-          {spareParts.map((item, index) => (
-            <div className="gx-part-card" key={index}>
-              <div className="gx-part-image">
-                <img src={item.image} alt={item.name} />
-                <span className="gx-badge-pill">Used</span>
-              </div>
+        {newListings.length === 0 ? (
+          <div className="gx-empty-state">
+            <div className="gx-empty-state-icon">📦</div>
+            <h2 className="gx-empty-state-title">
+              {search ? "No matching listings" : "No listings yet"}
+            </h2>
+            <p className="gx-empty-state-text">
+              {search
+                ? "Try a different search."
+                : "Be the first to list a spare part."}
+            </p>
+          </div>
+        ) : (
+          <div className="gx-grid">
+            {newListings.map((item) => (
+              <div className="gx-part-card" key={item.id}>
+                <div className="gx-part-image">
+                  <img src={item.imageUrl} alt={item.title} />
+                  {item.condition && (
+                    <span className="gx-badge-pill">{item.condition}</span>
+                  )}
+                </div>
 
-              <div className="gx-part-body">
-                <h3 className="gx-part-name">{item.name}</h3>
-                <p className="gx-part-meta">{item.vehicle}</p>
-                <p className="gx-part-price">₹{item.price}</p>
+                <div className="gx-part-body">
+                  <h3 className="gx-part-name">{item.title}</h3>
+                  <p className="gx-part-meta">
+                    {formatVehicleLabel(item)}
+                    {item.category ? ` · ${item.category}` : ""}
+                  </p>
+                  <p className="gx-part-price">
+                    ₹{item.price}
+                    {item.unitType === "Weight" ? " / kg" : ""}
+                  </p>
 
-                <button className="gx-btn gx-btn-outline">
-                  View details
-                </button>
+                  <span className="gx-district-tag">
+                    📍 {item.district || "Unknown"}
+                  </span>
+
+                  <div style={{ marginTop: 12 }}>
+                    <Link href={`/listing/${item.id}`}>
+                      <button className="gx-btn gx-btn-outline">
+                        View details
+                      </button>
+                    </Link>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         <div className="gx-section-head">
           <h2 className="gx-section-title">Nearby workshops</h2>
+          <Link href="/services" className="gx-section-link">
+            All services
+          </Link>
         </div>
 
-        <div className="gx-workshop-row">
-          {workshops.map((item, index) => (
-            <div className="gx-workshop-card" key={index}>
-              <div className="gx-workshop-image">
-                <img src={item.image} alt={item.name} />
-              </div>
+        {nearbyWorkshops.length === 0 ? (
+          <div className="gx-empty-state">
+            <div className="gx-empty-state-icon">🔧</div>
+            <h2 className="gx-empty-state-title">No workshops listed yet</h2>
+            <p className="gx-empty-state-text">
+              <Link href="/add-service?type=workshop" className="gx-section-link">
+                List your workshop
+              </Link>{" "}
+              to be the first.
+            </p>
+          </div>
+        ) : (
+          <div className="gx-workshop-row">
+            {nearbyWorkshops.map((item) => (
+              <div className="gx-workshop-card" key={item.id}>
+                <div className="gx-workshop-body">
+                  <h3 className="gx-workshop-name">{item.name}</h3>
+                  <p className="gx-workshop-loc">
+                    📍 {item.district || "Unknown"}
+                  </p>
 
-              <div className="gx-workshop-body">
-                <h3 className="gx-workshop-name">{item.name}</h3>
-                <p className="gx-workshop-loc">Kozhikode</p>
-                <div className="gx-rating">⭐ {item.rating}</div>
-
-                <button
-                  className="gx-btn gx-btn-outline"
-                  style={{ padding: "10px 14px", fontSize: "13.5px" }}
-                >
-                  View workshop
-                </button>
+                  <Link href="/services/workshop">
+                    <button
+                      className="gx-btn gx-btn-outline"
+                      style={{ padding: "10px 14px", fontSize: "13.5px" }}
+                    >
+                      View workshop
+                    </button>
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {!profile.isPremium && (
           <div className="gx-premium-banner">

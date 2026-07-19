@@ -13,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const publicLinks = [
   { href: "/", label: "Home" },
-  { href: "/workshops", label: "Workshops" },
+  { href: "/services", label: "Services" },
   { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -22,9 +22,8 @@ const publicLinks = [
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/ground", label: "Browse" },
+  { href: "/services", label: "Services" },
   { href: "/my-account", label: "My Account" },
-  { href: "/workshops", label: "Workshops" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/pricing", label: "Pricing" },
   { href: "/help", label: "Help" },
@@ -64,14 +63,11 @@ const tabs = [
     ),
   },
   {
-    href: "/ground",
-    label: "Browse",
+    href: "/services",
+    label: "Services",
     fab: false,
     icon: (
-      <>
-        <circle cx="11" cy="11" r="6.5" />
-        <path d="m20 20-3.8-3.8" />
-      </>
+      <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2 2.6-2.6Z" />
     ),
   },
   { ...primaryActions[0], fab: true },
