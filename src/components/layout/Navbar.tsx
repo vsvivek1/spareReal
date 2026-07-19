@@ -30,28 +30,22 @@ const navLinks = [
   { href: "/user/profile", label: "Profile" },
 ];
 
-// Sell and Request are the two core actions of the marketplace, so
-// they get dedicated, always-visible treatment instead of being just
-// another link in the scrollable nav — twin FABs on the mobile tab
-// bar, twin buttons pinned in the desktop header.
-const primaryActions = [
-  {
-    href: "/add-spare",
-    label: "Sell",
-    icon: <path d="M12 5v14M5 12h14" />,
-  },
-  {
-    href: "/make-request",
-    label: "Request",
-    icon: (
-      <>
-        <path d="M3 10v4a1 1 0 0 0 1 1h2l4 4V5L6 9H4a1 1 0 0 0-1 1Z" />
-        <path d="M15 8a4 4 0 0 1 0 8" />
-        <path d="M18 5a8 8 0 0 1 0 14" />
-      </>
-    ),
-  },
-];
+// Buying and selling spare parts is the core of the marketplace, so it
+// gets dedicated, always-visible treatment instead of being just another
+// link in the scrollable nav — one FAB on the mobile tab bar, one button
+// pinned in the desktop header. The Buy/Sell split lives inside the page
+// as tabs.
+const primaryAction = {
+  href: "/spare-parts",
+  label: "Spare Parts",
+  icon: (
+    <>
+      <path d="M21 8 12 3 3 8l9 5 9-5Z" />
+      <path d="M3 8v8l9 5 9-5V8" />
+      <path d="M12 13v8" />
+    </>
+  ),
+};
 
 const tabs = [
   {
@@ -70,8 +64,7 @@ const tabs = [
       <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2 2.6-2.6Z" />
     ),
   },
-  { ...primaryActions[0], fab: true },
-  { ...primaryActions[1], fab: true },
+  { ...primaryAction, fab: true },
 ];
 
 function TabIcon({ children }: { children: React.ReactNode }) {
@@ -162,19 +155,11 @@ export default function Navbar() {
 
             <div className="gx-primary-actions">
               <Link
-                href="/add-spare"
+                href={primaryAction.href}
                 className="gx-primary-btn gx-primary-btn-sell"
               >
-                <TabIcon>{primaryActions[0].icon}</TabIcon>
-                Sell
-              </Link>
-
-              <Link
-                href="/make-request"
-                className="gx-primary-btn gx-primary-btn-request"
-              >
-                <TabIcon>{primaryActions[1].icon}</TabIcon>
-                Request
+                <TabIcon>{primaryAction.icon}</TabIcon>
+                {primaryAction.label}
               </Link>
             </div>
 
@@ -239,19 +224,19 @@ export default function Navbar() {
 
             <div className="gx-drawer-actions">
               <Link
-                href="/add-spare"
+                href="/spare-parts?tab=buy"
                 className="gx-primary-btn gx-primary-btn-sell"
               >
-                <TabIcon>{primaryActions[0].icon}</TabIcon>
-                Sell a spare
+                <TabIcon>{primaryAction.icon}</TabIcon>
+                Buy a spare
               </Link>
 
               <Link
-                href="/make-request"
+                href="/spare-parts?tab=sell"
                 className="gx-primary-btn gx-primary-btn-request"
               >
-                <TabIcon>{primaryActions[1].icon}</TabIcon>
-                Request a spare
+                <TabIcon>{primaryAction.icon}</TabIcon>
+                Sell a spare
               </Link>
             </div>
 
