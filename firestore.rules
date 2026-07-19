@@ -2,45 +2,58 @@
   service cloud.firestore {
     match /databases/{database}/documents {
 
+      // A user may only write if they proved ownership of their identity:
+      // either they passed phone/SMS verification (the `phoneVerified` custom
+      // claim, set server-side in /api/auth/verify-otp) or they signed in with
+      // Google. This blocks the bypass where anyone could call
+      // createUserWithEmailAndPassword directly against the public Firebase
+      // config and get a `password`-provider session with no verification.
+      function verified() {
+        return request.auth != null && (
+          request.auth.token.phoneVerified == true ||
+          request.auth.token.firebase.sign_in_provider == 'google.com'
+        );
+      }
+
       match /users/{userId} {
         allow read: if true;
-        allow write: if request.auth != null && request.auth.uid == userId;
+        allow write: if verified() && request.auth.uid == userId;
       }
 
       match /spareListings/{listingId} {
         allow read: if true;
-        allow create: if request.auth != null;
-        allow update, delete: if request.auth != null && request.auth.uid == resource.data.sellerId;
+        allow create: if verified();
+        allow update, delete: if verified() && request.auth.uid == resource.data.sellerId;
       }
 
       match /vehicles/{vehicleId} {
         allow read: if true;
-        allow create: if request.auth != null;
-        allow update, delete: if request.auth != null && request.auth.uid == resource.data.sellerId;
+        allow create: if verified();
+        allow update, delete: if verified() && request.auth.uid == resource.data.sellerId;
       }
 
       match /spareRequests/{requestId} {
         allow read: if true;
-        allow create: if request.auth != null;
-        allow update, delete: if request.auth != null && request.auth.uid == resource.data.requesterId;
+        allow create: if verified();
+        allow update, delete: if verified() && request.auth.uid == resource.data.requesterId;
       }
 
       match /sales/{saleId} {
-        allow create: if request.auth != null
+        allow create: if verified()
           && request.auth.uid == request.resource.data.sellerId;
-        allow read: if request.auth != null
+        allow read: if verified()
           && request.auth.uid == resource.data.sellerId;
       }
 
       match /workshops/{workshopId} {
         allow read: if true;
-        allow create: if request.auth != null;
-        allow update, delete: if request.auth != null && request.auth.uid == resource.data.ownerId;
+        allow create: if verified();
+        allow update, delete: if verified() && request.auth.uid == resource.data.ownerId;
       }
 
       match /reviews/{reviewId} {
         allow read: if true;
-        allow create: if request.auth != null
+        allow create: if verified()
           && request.auth.uid == request.resource.data.raterId
           && request.resource.data.raterId != request.resource.data.sellerId;
       }

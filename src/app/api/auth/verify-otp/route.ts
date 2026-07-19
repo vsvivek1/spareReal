@@ -87,7 +87,21 @@ export async function POST(request: Request) {
 
     }
 
-    const customToken = await adminAuth.createCustomToken(uid);
+    // Mark this account as phone-verified. This is the ONLY place the claim
+    // is ever set, and it's behind the MSG91 trust boundary above — so it
+    // proves the account went through real SMS verification. setCustomUserClaims
+    // persists it on the user record, so every future token (including later
+    // username+password logins via signInWithEmailAndPassword) carries it too.
+    // The Firestore rules require this claim for writes, which closes the hole
+    // where anyone could createUserWithEmailAndPassword against the public
+    // Firebase config and bypass phone verification entirely.
+    await adminAuth.setCustomUserClaims(uid, { phoneVerified: true });
+
+    // Also pass it as a developer claim so it's present on the very first
+    // token minted from this custom token, not just after the next refresh.
+    const customToken = await adminAuth.createCustomToken(uid, {
+      phoneVerified: true
+    });
 
     return NextResponse.json({ customToken });
 
