@@ -3,13 +3,12 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   linkWithCredential,
-  signInWithEmailAndPassword,
   updatePassword,
   EmailAuthProvider
 } from "firebase/auth";
 
 import { auth } from "@/lib/firebase";
-import { normalizePhone, getUserByUsername } from "@/services/userService";
+import { normalizePhone } from "@/services/userService";
 import { sendOtpViaWidget, verifyOtpViaWidget } from "@/lib/msg91Widget";
 
 // Firebase Auth has no native "username" concept, so every phone-verified
@@ -219,21 +218,25 @@ export const loginWithPassword = async (
   password: string
 ) => {
 
-  const account = await getUserByUsername(username) as { phone?: string } | null;
+  // The username lookup and password check run server-side (users docs
+  // aren't publicly readable); we get back a custom token for the account.
+  const response = await fetch("/api/auth/password-login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
 
-  if (!account?.phone) {
+  const data = await response.json().catch(() => ({}));
 
-    throw new Error("Incorrect username or password.");
+  if (!response.ok || !data.customToken) {
+
+    throw new Error(data.error || "Incorrect username or password.");
 
   }
 
   try {
 
-    return await signInWithEmailAndPassword(
-      auth,
-      phoneToPseudoEmail(account.phone),
-      password
-    );
+    return await signInWithCustomToken(auth, data.customToken);
 
   } catch (error) {
 

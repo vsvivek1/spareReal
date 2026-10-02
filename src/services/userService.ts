@@ -1,12 +1,8 @@
 import {
- collection,
  doc,
  getDoc,
- getDocs,
- query,
  setDoc,
- updateDoc,
- where
+ updateDoc
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
@@ -174,132 +170,5 @@ export const normalizeUsername =
  return username
  .trim()
  .toLowerCase();
-
-};
-
-export const getUserByUsername =
-async(username:string)=>{
-
- try{
-
-   const normalizedUsername =
-   normalizeUsername(username);
-
-   if(!normalizedUsername){
-
-     return null;
-
-   }
-
-   const q =
-   query(
-     collection(
-       db,
-       "users"
-     ),
-
-     where(
-       "username",
-       "==",
-       normalizedUsername
-     )
-   );
-
-   const snapshot =
-   await getDocs(q);
-
-   if(snapshot.empty){
-
-     return null;
-
-   }
-
-   return {
-
-     id:
-     snapshot.docs[0].id,
-
-     ...snapshot.docs[0].data()
-
-   };
-
- }catch(error){
-
-   console.log(error);
-
-   return null;
-
- }
-
-};
-
-export const isUsernameTaken =
-async(
- username:string,
- excludeUid?:string
-)=>{
-
- const existing =
- await getUserByUsername(
-   username
- );
-
- if(!existing){
-
-   return false;
-
- }
-
- return existing.id !== excludeUid;
-
-};
-
-export const getUserByPhone =
-async(phone:string)=>{
-
- try{
-
-   const normalizedPhone =
-   normalizePhone(phone);
-
-   const q =
-   query(
-     collection(
-       db,
-       "users"
-     ),
-
-     where(
-       "normalizedPhone",
-       "==",
-       normalizedPhone
-     )
-   );
-
-   const snapshot =
-   await getDocs(q);
-
-   if(snapshot.empty){
-
-     return null;
-
-   }
-
-   return {
-
-     id:
-     snapshot.docs[0].id,
-
-     ...snapshot.docs[0].data()
-
-   };
-
- }catch(error){
-
-   console.log(error);
-
-   return null;
-
- }
 
 };

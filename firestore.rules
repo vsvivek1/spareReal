@@ -15,9 +15,17 @@
         );
       }
 
+      // Profiles hold phone numbers, so only the owner can read them.
+      // Username login looks profiles up server-side (/api/auth/password-login).
+      // isPremium is granted by hand (Admin SDK), never self-set.
       match /users/{userId} {
-        allow read: if true;
-        allow write: if verified() && request.auth.uid == userId;
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow create: if verified() && request.auth.uid == userId
+          && request.resource.data.get('isPremium', false) == false;
+        allow update: if verified() && request.auth.uid == userId
+          && request.resource.data.get('isPremium', false)
+             == resource.data.get('isPremium', false);
+        allow delete: if verified() && request.auth.uid == userId;
       }
 
       match /spareListings/{listingId} {
@@ -49,6 +57,24 @@
         allow read: if true;
         allow create: if verified();
         allow update, delete: if verified() && request.auth.uid == resource.data.ownerId;
+      }
+
+      // Slot bookings are created only by /api/bookings (Admin SDK), which
+      // enforces per-slot capacity in a transaction. The customer and the
+      // service owner can read them, and either can cancel — nothing else.
+      match /bookings/{bookingId} {
+        allow read: if request.auth != null && (
+          request.auth.uid == resource.data.customerId ||
+          request.auth.uid == resource.data.ownerId
+        );
+        allow update: if verified() && (
+            request.auth.uid == resource.data.customerId ||
+            request.auth.uid == resource.data.ownerId
+          )
+          && resource.data.status == 'booked'
+          && request.resource.data.status == 'cancelled'
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status', 'cancelledAt']);
       }
 
       match /reviews/{reviewId} {

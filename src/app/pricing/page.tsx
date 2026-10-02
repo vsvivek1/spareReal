@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 
 export default function PricingPage() {
   return (
@@ -51,9 +50,18 @@ export default function PricingPage() {
               <li>✓ Unlimited spare part listings</li>
             </ul>
 
-            <Link href="/payment-success">
-              <button className="gx-btn gx-btn-primary">Upgrade now</button>
-            </Link>
+            {/* No payment gateway yet: upgrades are activated by hand after
+                the seller gets in touch. isPremium can't be self-set (see
+                firestore.rules), so this is the only path to Premium. */}
+            <a
+              href="mailto:support@sparex.app?subject=Upgrade%20to%20spareX%20Premium"
+              className="gx-btn gx-btn-primary"
+            >
+              Request Premium
+            </a>
+            <p className="gx-plan-sub" style={{ marginTop: 8 }}>
+              We&apos;ll reply with payment details and switch you on.
+            </p>
           </div>
         </div>
       </div>
