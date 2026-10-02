@@ -7,13 +7,15 @@ import { useSearchParams } from "next/navigation";
 import ListingsTab from "@/components/account/ListingsTab";
 import RequestsTab from "@/components/account/RequestsTab";
 import VehiclesTab from "@/components/account/VehiclesTab";
+import BookingsTab from "@/components/account/BookingsTab";
 
-type Tab = "listings" | "requests" | "vehicles";
+type Tab = "listings" | "requests" | "vehicles" | "bookings";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "listings", label: "Listings" },
   { id: "requests", label: "Requests" },
   { id: "vehicles", label: "Vehicles" },
+  { id: "bookings", label: "Bookings" },
 ];
 
 function MyAccountContent() {
@@ -30,11 +32,11 @@ function MyAccountContent() {
         <div className="gx-page-header">
           <h1 className="gx-dash-title">My Account</h1>
           <p className="gx-dash-sub">
-            Your listings, requests, and vehicles, all in one place.
+            Your listings, requests, vehicles, and bookings, all in one place.
           </p>
         </div>
 
-        <div className="gx-tabs" style={{ maxWidth: 420 }}>
+        <div className="gx-tabs" style={{ maxWidth: 560 }}>
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -52,6 +54,7 @@ function MyAccountContent() {
         {activeTab === "listings" && <ListingsTab />}
         {activeTab === "requests" && <RequestsTab />}
         {activeTab === "vehicles" && <VehiclesTab />}
+        {activeTab === "bookings" && <BookingsTab />}
       </div>
     </div>
   );

@@ -18,6 +18,14 @@ import HelpHint from "@/components/HelpHint";
 
 import { SERVICE_TYPES, getServiceType } from "@/lib/serviceTypes";
 
+import {
+  DEFAULT_CLOSE_TIME,
+  DEFAULT_OPEN_TIME,
+  DEFAULT_SLOT_MINUTES,
+  SLOT_MINUTE_OPTIONS,
+  isBookableSlug,
+} from "@/lib/booking";
+
 function AddServiceForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -35,6 +43,10 @@ function AddServiceForm() {
   const [address, setAddress] = useState("");
   const [vehicleCapacity, setVehicleCapacity] = useState("");
 
+  const [openTime, setOpenTime] = useState(DEFAULT_OPEN_TIME);
+  const [closeTime, setCloseTime] = useState(DEFAULT_CLOSE_TIME);
+  const [slotMinutes, setSlotMinutes] = useState(DEFAULT_SLOT_MINUTES);
+
   const [district, setDistrict] = useState("");
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null
@@ -48,6 +60,7 @@ function AddServiceForm() {
 
   const isWorkshop = slug === "workshop";
   const isOther = slug === "other";
+  const takesBookings = isBookableSlug(slug);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -143,6 +156,11 @@ function AddServiceForm() {
       }
     }
 
+    if (takesBookings && openTime >= closeTime) {
+      setError("Closing time must be after opening time.");
+      return;
+    }
+
     const typeLabel = isOther
       ? customType.trim()
       : getServiceType(slug).singular;
@@ -157,6 +175,7 @@ function AddServiceForm() {
         phone: phone.trim(),
         address: address.trim() || null,
         vehicleCapacity: capacityNum,
+        ...(takesBookings ? { openTime, closeTime, slotMinutes } : {}),
         district: district || null,
         lat: location.lat,
         lng: location.lng,
@@ -263,6 +282,53 @@ function AddServiceForm() {
                 inputMode="numeric"
               />
               <HelpHint text={FIELD_HINTS.addWorkshop.vehicleCapacity} />
+            </div>
+          )}
+
+          {takesBookings && (
+            <div className="gx-field">
+              <label className="gx-label">Opening hours for bookings</label>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input
+                  className="gx-input"
+                  type="time"
+                  value={openTime}
+                  onChange={(e) => setOpenTime(e.target.value)}
+                  aria-label="Opens at"
+                />
+                <input
+                  className="gx-input"
+                  type="time"
+                  value={closeTime}
+                  onChange={(e) => setCloseTime(e.target.value)}
+                  aria-label="Closes at"
+                />
+              </div>
+
+              <label className="gx-label" style={{ marginTop: 12 }}>
+                Each booking slot is
+              </label>
+              <div className="gx-role-group">
+                {SLOT_MINUTE_OPTIONS.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    className={
+                      "gx-role-option" +
+                      (m === slotMinutes ? " gx-role-option-active" : "")
+                    }
+                    onClick={() => setSlotMinutes(m)}
+                  >
+                    {m < 60 ? `${m} min` : `${m / 60} hr`}
+                  </button>
+                ))}
+              </div>
+              <p className="gx-hint">
+                Customers can book any free slot in the next two weeks.
+                {isWorkshop
+                  ? " Each slot takes as many vehicles as your capacity above."
+                  : " Each slot takes one customer."}
+              </p>
             </div>
           )}
 

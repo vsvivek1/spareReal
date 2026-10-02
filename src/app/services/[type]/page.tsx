@@ -17,6 +17,8 @@ import { distanceKm } from "@/lib/geo";
 
 import { whatsAppLink } from "@/lib/contact";
 
+import { isBookableSlug } from "@/lib/booking";
+
 const WorkshopsMap = dynamic(() => import("@/components/WorkshopsMap"), {
   ssr: false,
 });
@@ -238,6 +240,17 @@ export default function ServiceTypePage() {
                       Can take {s.vehicleCapacity} vehicle
                       {s.vehicleCapacity === 1 ? "" : "s"} at once
                     </p>
+                  )}
+
+                  {isBookableSlug(slug) && user?.uid !== s.ownerId && (
+                    <Link href={`/book/${s.id}`}>
+                      <button
+                        className="gx-btn gx-btn-primary"
+                        style={{ marginTop: 12, width: "100%" }}
+                      >
+                        📅 Book a slot
+                      </button>
+                    </Link>
                   )}
 
                   <div className="gx-detail-actions" style={{ marginTop: 12 }}>
