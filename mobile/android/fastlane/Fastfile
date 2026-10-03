@@ -1,0 +1,38 @@
+default_platform(:android)
+
+# Run from mobile/android. Builds with Flutter (so --dart-define config is
+# applied), then uploads the bundle with supply.
+#
+#   DART_DEFINES="--dart-define=FIREBASE_API_KEY=... ..." fastlane internal
+#
+# Signing comes from android/key.properties (see app/build.gradle.kts).
+platform :android do
+  def build_bundle
+    defines = ENV.fetch("DART_DEFINES", "")
+    sh("cd ../.. && flutter build appbundle --release #{defines}")
+  end
+
+  desc "Build and upload to the internal testing track"
+  lane :internal do
+    build_bundle
+    upload_to_play_store(
+      track: "internal",
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Promote the latest internal build to production"
+  lane :production do
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "production",
+      skip_upload_changelogs: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+end

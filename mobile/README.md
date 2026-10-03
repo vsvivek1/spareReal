@@ -62,12 +62,20 @@ keytool -genkey -v -keystore upload.jks -keyalg RSA -keysize 2048 \
   -validity 10000 -alias upload
 ```
 
-**Google Play:** create the app in Play Console (package `app.sparex.sparex`),
-fill in the store listing, privacy policy and Data safety form, and upload the
-first `.aab` from a workflow run by hand (Play requires the first upload to be
-manual). After that, run the *Mobile app* workflow with "Upload to Google
-Play" ticked to push each new build to internal testing, then promote it in
-Play Console.
+**Google Play (fastlane):** from `mobile/android`, with your Play
+service-account key at `play-key.json` (or `SUPPLY_JSON_KEY`) and your
+upload keystore in `android/key.properties`:
+
+```bash
+DART_DEFINES="--dart-define=FIREBASE_API_KEY=... --dart-define=FIREBASE_ANDROID_APP_ID=..." \
+  fastlane internal     # build and upload to internal testing
+fastlane production     # promote the latest internal build
+```
+
+Create the app in Play Console (package `app.sparex.sparex`) with its store
+listing, privacy policy and Data safety form before the first upload. CI can
+also upload: run the *Mobile app* workflow with "Upload to Google Play"
+ticked once the secrets above are set.
 
 **App Store:** needs an Apple Developer account and a Mac (or a CI service
 with signing). The workflow only checks that the iOS app compiles. To ship,
