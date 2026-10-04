@@ -15,7 +15,7 @@ val keyProperties = Properties().apply {
 }
 
 android {
-    namespace = "app.sparex.sparex"
+    namespace = "com.calecutech.sparex"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -25,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "app.sparex.sparex"
+        applicationId = "com.calecutech.sparex"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = maxOf(flutter.minSdkVersion, 23)

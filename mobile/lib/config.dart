@@ -36,6 +36,6 @@ class AppConfig {
         messagingSenderId: _senderId,
         projectId: _projectId,
         storageBucket: _bucket,
-        iosBundleId: 'app.sparex.sparex',
+        iosBundleId: 'com.calecutech.sparex',
       );
 }

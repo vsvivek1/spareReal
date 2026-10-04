@@ -1,4 +1,4 @@
 # Path to your Play Console service-account key. Kept out of git; set
 # SUPPLY_JSON_KEY or drop the file at mobile/android/play-key.json.
 json_key_file(ENV["SUPPLY_JSON_KEY"] || "play-key.json")
-package_name("app.sparex.sparex")
+package_name("com.calecutech.sparex")

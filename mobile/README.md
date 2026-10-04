@@ -29,8 +29,8 @@ lives on another domain.
 ## One-time setup
 
 1. **Firebase:** in Project settings → Your apps, add an Android app with
-   package `app.sparex.sparex` and an iOS app with bundle ID
-   `app.sparex.sparex`. Copy each app ID into `FIREBASE_ANDROID_APP_ID` /
+   package `com.calecutech.sparex` and an iOS app with bundle ID
+   `com.calecutech.sparex`. Copy each app ID into `FIREBASE_ANDROID_APP_ID` /
    `FIREBASE_IOS_APP_ID`. Add your upload key's and Play's app-signing SHA-1
    and SHA-256 to the Android app so Google sign-in works.
 2. **Google sign-in:** `GOOGLE_SERVER_CLIENT_ID` is the *Web client* ID under
@@ -72,7 +72,7 @@ DART_DEFINES="--dart-define=FIREBASE_API_KEY=... --dart-define=FIREBASE_ANDROID_
 fastlane production     # promote the latest internal build
 ```
 
-Create the app in Play Console (package `app.sparex.sparex`) with its store
+Create the app in Play Console (package `com.calecutech.sparex`) with its store
 listing, privacy policy and Data safety form before the first upload. CI can
 also upload: run the *Mobile app* workflow with "Upload to Google Play"
 ticked once the secrets above are set.
