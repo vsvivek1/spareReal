@@ -42,8 +42,14 @@ class AppConfig {
     defaultValue: _webAppId,
   );
 
-  static const msg91WidgetId = String.fromEnvironment('MSG91_WIDGET_ID');
-  static const msg91TokenAuth = String.fromEnvironment('MSG91_TOKEN_AUTH');
+  static const msg91WidgetId = String.fromEnvironment(
+    'MSG91_WIDGET_ID',
+    defaultValue: '36676c686952333337343337',
+  );
+  static const msg91TokenAuth = String.fromEnvironment(
+    'MSG91_TOKEN_AUTH',
+    defaultValue: '549758TvRt5ODre6a534cd4P1',
+  );
 
   /// Web OAuth client ID from Firebase (Authentication → Google), needed on
   /// Android to get an ID token Firebase accepts.
