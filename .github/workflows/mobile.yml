@@ -90,11 +90,36 @@ jobs:
           path: |
             mobile/build/app/outputs/bundle/release/app-release.aab
             mobile/build/app/outputs/flutter-apk/app-release.apk
+      # Accepts the key file's text or its base64, and says which fields are
+      # missing (never the values) when the secret was pasted incompletely.
+      - name: Check the Play service-account key
+        if: inputs.release && env.PLAY_SERVICE_ACCOUNT_JSON != '' && env.ANDROID_KEYSTORE_BASE64 != ''
+        run: |
+          python3 - <<'PY'
+          import base64, json, os, sys
+          raw = os.environ["PLAY_SERVICE_ACCOUNT_JSON"].strip()
+          print(f"Secret length: {len(raw)} characters, starts with {raw[:1]!r}")
+          try:
+              key = json.loads(raw)
+          except ValueError:
+              try:
+                  key = json.loads(base64.b64decode(raw))
+              except Exception:
+                  sys.exit("PLAY_SERVICE_ACCOUNT_JSON is not the key file's JSON text (or its base64).")
+          if isinstance(key, str):
+              key = json.loads(key)
+          print("Fields found:", ", ".join(sorted(key)))
+          missing = [f for f in ("type", "client_email", "private_key") if f not in key]
+          if missing:
+              sys.exit("PLAY_SERVICE_ACCOUNT_JSON is missing: " + ", ".join(missing))
+          with open(os.path.join(os.environ["RUNNER_TEMP"], "play-key.json"), "w") as f:
+              json.dump(key, f)
+          PY
       - name: Upload to Google Play (internal testing)
         if: inputs.release && env.PLAY_SERVICE_ACCOUNT_JSON != '' && env.ANDROID_KEYSTORE_BASE64 != ''
         uses: r0adkll/upload-google-play@v1
         with:
-          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          serviceAccountJson: ${{ runner.temp }}/play-key.json
           packageName: com.calecutech.sparex
           releaseFiles: mobile/build/app/outputs/bundle/release/app-release.aab
           track: internal
