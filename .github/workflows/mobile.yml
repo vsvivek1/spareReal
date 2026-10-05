@@ -36,19 +36,19 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     env:
-      # Same values as the web app's NEXT_PUBLIC_* settings, plus the Android
-      # app ID from Firebase (Project settings → Your apps).
-      DART_DEFINES: >-
-        --dart-define=API_BASE=${{ vars.API_BASE || 'https://spare-real.vercel.app' }}
-        --dart-define=FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
-        --dart-define=FIREBASE_PROJECT_ID=${{ vars.FIREBASE_PROJECT_ID || 'sparex-79653' }}
-        --dart-define=FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
-        --dart-define=FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}
-        --dart-define=FIREBASE_ANDROID_APP_ID=${{ secrets.FIREBASE_ANDROID_APP_ID }}
-        --dart-define=FIREBASE_IOS_APP_ID=${{ secrets.FIREBASE_IOS_APP_ID }}
-        --dart-define=GOOGLE_SERVER_CLIENT_ID=${{ secrets.GOOGLE_SERVER_CLIENT_ID }}
-        --dart-define=MSG91_WIDGET_ID=${{ secrets.MSG91_WIDGET_ID }}
-        --dart-define=MSG91_TOKEN_AUTH=${{ secrets.MSG91_TOKEN_AUTH }}
+      # Optional overrides. The app's own defaults (mobile/lib/config.dart)
+      # are used for anything left unset; empty values are not passed, so they
+      # never blank out a default.
+      API_BASE: ${{ vars.API_BASE }}
+      FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+      FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+      FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+      FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+      FIREBASE_ANDROID_APP_ID: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
+      FIREBASE_IOS_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID }}
+      GOOGLE_SERVER_CLIENT_ID: ${{ secrets.GOOGLE_SERVER_CLIENT_ID }}
+      MSG91_WIDGET_ID: ${{ secrets.MSG91_WIDGET_ID }}
+      MSG91_TOKEN_AUTH: ${{ secrets.MSG91_TOKEN_AUTH }}
       ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
     steps:
@@ -68,9 +68,18 @@ jobs:
           cat > android/key.properties <<PROPS
           storeFile=upload.jks
           storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
-          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS || 'upload' }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD || secrets.ANDROID_KEYSTORE_PASSWORD }}
           PROPS
+      - name: Collect build settings
+        run: |
+          defines=""
+          for name in API_BASE FIREBASE_API_KEY FIREBASE_PROJECT_ID FIREBASE_MESSAGING_SENDER_ID \
+            FIREBASE_STORAGE_BUCKET FIREBASE_ANDROID_APP_ID FIREBASE_IOS_APP_ID \
+            GOOGLE_SERVER_CLIENT_ID MSG91_WIDGET_ID MSG91_TOKEN_AUTH; do
+            if [ -n "${!name}" ]; then defines="$defines --dart-define=$name=${!name}"; fi
+          done
+          echo "DART_DEFINES=$defines" >> "$GITHUB_ENV"
       - run: flutter pub get
       # Each run gets a higher versionCode, which Play requires per upload.
       - run: flutter build appbundle --release --build-number=${{ github.run_number }} $DART_DEFINES

@@ -52,7 +52,7 @@ Repo secrets it uses (Settings → Secrets and variables → Actions):
 | `GOOGLE_SERVER_CLIENT_ID` | From step 2 |
 | `MSG91_WIDGET_ID`, `MSG91_TOKEN_AUTH` | Same as the web's `NEXT_PUBLIC_MSG91_*` |
 | `ANDROID_KEYSTORE_BASE64` | `base64 -w0 upload.jks` of your upload keystore |
-| `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | For that keystore |
+| `ANDROID_KEYSTORE_PASSWORD` | Its password. `ANDROID_KEY_ALIAS` (default `upload`) and `ANDROID_KEY_PASSWORD` (default: the keystore password) are optional |
 | `PLAY_SERVICE_ACCOUNT_JSON` | Play Console service account with release permission |
 
 Create the upload keystore once:
