@@ -9,9 +9,14 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        description: "Upload the Android build to Google Play (internal testing)"
+        description: "Upload the Android build to Google Play"
         type: boolean
         default: false
+      track:
+        description: "Play track to release to"
+        type: choice
+        options: [internal, alpha, beta]
+        default: internal
 
 defaults:
   run:
@@ -115,15 +120,15 @@ jobs:
           with open(os.path.join(os.environ["RUNNER_TEMP"], "play-key.json"), "w") as f:
               json.dump(key, f)
           PY
-      - name: Upload to Google Play (internal testing)
+      - name: Upload to Google Play
         if: inputs.release && env.PLAY_SERVICE_ACCOUNT_JSON != '' && env.ANDROID_KEYSTORE_BASE64 != ''
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: ${{ runner.temp }}/play-key.json
           packageName: com.calecutech.sparex
           releaseFiles: mobile/build/app/outputs/bundle/release/app-release.aab
-          track: internal
-          status: draft
+          tracks: ${{ inputs.track || 'internal' }}
+          status: completed
 
   ios:
     name: iOS build (unsigned)
