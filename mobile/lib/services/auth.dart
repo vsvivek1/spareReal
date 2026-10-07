@@ -53,24 +53,47 @@ class AuthService {
     await _auth.signInWithCustomToken(data['customToken'] as String);
   }
 
+  static Future<void> _initGoogle() async {
+    if (_googleReady) return;
+    await GoogleSignIn.instance.initialize(
+      serverClientId: AppConfig.googleServerClientId.isEmpty
+          ? null
+          : AppConfig.googleServerClientId,
+    );
+    _googleReady = true;
+  }
+
   static Future<void> signInWithGoogle() async {
-    final google = GoogleSignIn.instance;
-    if (!_googleReady) {
-      await google.initialize(
-        serverClientId: AppConfig.googleServerClientId.isEmpty
-            ? null
-            : AppConfig.googleServerClientId,
-      );
-      _googleReady = true;
-    }
-    final account = await google.authenticate();
+    await _initGoogle();
+    final account = await GoogleSignIn.instance.authenticate();
     final idToken = account.authentication.idToken;
     await _auth.signInWithCredential(GoogleAuthProvider.credential(idToken: idToken));
   }
 
   static Future<void> signOut() async {
+    // A Google session may come from an earlier app run, before
+    // GoogleSignIn was initialized in this one.
+    final usedGoogle = _auth.currentUser?.providerData
+            .any((p) => p.providerId == GoogleAuthProvider.PROVIDER_ID) ??
+        false;
     await _auth.signOut();
-    if (_googleReady) await GoogleSignIn.instance.signOut();
+    if (_googleReady || usedGoogle) {
+      try {
+        await _initGoogle();
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {
+        // Firebase is already signed out; a stale Google session only means
+        // the account picker may preselect it next time.
+      }
+    }
+  }
+
+  /// Permanently deletes the signed-in account and all its data via
+  /// /api/account/delete (see that route for exactly what is removed), then
+  /// signs out locally.
+  static Future<void> deleteAccount() async {
+    await Api.post('/api/account/delete', {}, auth: true);
+    await signOut();
   }
 
   static Future<Map<String, dynamic>?> myProfile() async {

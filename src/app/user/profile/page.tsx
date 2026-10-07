@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/contexts/AuthContext";
 
 import { getUserProfile } from "@/services/userService";
 
 import { getSellerReviews } from "@/services/reviewService";
+
+import { deleteAccount } from "@/services/authService";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -17,6 +20,28 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [avgRating, setAvgRating] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  const router = useRouter();
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDeleteError("");
+
+    try {
+      await deleteAccount();
+      router.replace("/login");
+    } catch (error) {
+      setDeleteError(
+        error instanceof Error
+          ? error.message
+          : "Couldn't delete your account. Please try again."
+      );
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -135,6 +160,64 @@ export default function ProfilePage() {
             Edit profile
           </button>
         </Link>
+
+        <div className="gx-info-card" style={{ marginTop: 32 }}>
+          <h2 className="gx-profile-name" style={{ fontSize: 18 }}>
+            Delete account
+          </h2>
+
+          {deleteError && (
+            <div className="gx-alert gx-alert-error">{deleteError}</div>
+          )}
+
+          {confirmingDelete ? (
+            <>
+              <p className="gx-profile-meta">
+                This permanently deletes your spareX account and can&apos;t be
+                undone. Your profile, spare listings, vehicles, part requests,
+                services, sales records, reviews and uploaded photos will be
+                removed. Bookings stay visible to the other party with your
+                name and phone removed, and upcoming ones are cancelled.
+              </p>
+
+              <div className="gx-chip-row" style={{ marginTop: 12 }}>
+                <button
+                  type="button"
+                  className="gx-btn gx-btn-danger-outline"
+                  onClick={handleDeleteAccount}
+                  disabled={deleting}
+                >
+                  {deleting ? "Deleting..." : "Yes, delete permanently"}
+                </button>
+
+                <button
+                  type="button"
+                  className="gx-btn gx-btn-secondary"
+                  onClick={() => setConfirmingDelete(false)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="gx-profile-meta">
+                Permanently remove your account and everything you&apos;ve
+                posted on spareX.
+              </p>
+
+              <button
+                type="button"
+                className="gx-btn gx-btn-danger-outline"
+                style={{ marginTop: 12 }}
+                onClick={() => setConfirmingDelete(true)}
+              >
+                Delete my account
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

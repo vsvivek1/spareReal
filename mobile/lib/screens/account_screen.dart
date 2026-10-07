@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../services/api.dart';
 import '../services/auth.dart';
 import '../services/data.dart';
 import '../services/format.dart';
@@ -45,6 +46,22 @@ class AccountScreen extends StatelessWidget {
                     onPressed: AuthService.signOut,
                     icon: const Icon(Icons.logout),
                   ),
+                  PopupMenuButton<String>(
+                    tooltip: 'More',
+                    onSelected: (value) {
+                      if (value == 'delete') _deleteAccount(context);
+                    },
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: ListTile(
+                          leading: Icon(Icons.delete_forever, color: Colors.redAccent),
+                          title: Text('Delete account'),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
                 bottom: const TabBar(tabs: [
                   Tab(text: 'Listings'),
@@ -57,6 +74,70 @@ class AccountScreen extends StatelessWidget {
           );
         },
       );
+}
+
+Future<void> _deleteAccount(BuildContext context) async {
+  final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Delete your account?'),
+          content: const Text(
+            'This permanently deletes your spareX account and cannot be undone.\n\n'
+            'Your profile, spare listings, vehicles, part requests, services, '
+            'sales records, reviews and uploaded photos will be removed.\n\n'
+            'Bookings stay visible to the other party with your name and phone '
+            'removed, and upcoming ones are cancelled.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Delete permanently'),
+            ),
+          ],
+        ),
+      ) ==
+      true;
+  if (!confirmed || !context.mounted) return;
+
+  // Grab these now: signing out rebuilds this screen and unmounts [context].
+  final navigator = Navigator.of(context, rootNavigator: true);
+  final messenger = ScaffoldMessenger.of(context);
+
+  showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const PopScope(
+      canPop: false,
+      child: AlertDialog(
+        content: Row(children: [
+          CircularProgressIndicator(),
+          SizedBox(width: 20),
+          Expanded(child: Text('Deleting your account...')),
+        ]),
+      ),
+    ),
+  );
+
+  try {
+    await AuthService.deleteAccount();
+    navigator.pop(); // progress dialog
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Your account has been deleted.')),
+    );
+    navigator.push(MaterialPageRoute(builder: (_) => const LoginScreen()));
+  } catch (e) {
+    navigator.pop(); // progress dialog
+    messenger.showSnackBar(SnackBar(
+      content: Text(e is ApiException
+          ? e.message
+          : "Couldn't delete your account. Check your connection and try again."),
+    ));
+  }
 }
 
 Future<bool> _confirm(BuildContext context, String question) async =>
