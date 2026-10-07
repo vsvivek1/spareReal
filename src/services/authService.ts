@@ -4,7 +4,8 @@ import {
   GoogleAuthProvider,
   linkWithCredential,
   updatePassword,
-  EmailAuthProvider
+  EmailAuthProvider,
+  signOut
 } from "firebase/auth";
 
 import { auth } from "@/lib/firebase";
@@ -275,5 +276,34 @@ export const resetPasswordAfterOtp = async (
     );
 
   }
+
+};
+
+// Permanently deletes the signed-in account and its data server-side (see
+// /api/account/delete), then clears the now-dead local session.
+export const deleteAccount = async () => {
+
+  const token = await auth.currentUser?.getIdToken();
+
+  if (!token) {
+
+    throw new Error("Please log in first.");
+
+  }
+
+  const response = await fetch("/api/account/delete", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+
+    throw new Error(data.error || "Couldn't delete your account. Please try again.");
+
+  }
+
+  await signOut(auth).catch(() => {});
 
 };
