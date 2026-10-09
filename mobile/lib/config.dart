@@ -55,6 +55,8 @@ class AppConfig {
   /// Android to get an ID token Firebase accepts.
   static const googleServerClientId = String.fromEnvironment(
     'GOOGLE_SERVER_CLIENT_ID',
+    defaultValue:
+        '611789862720-vljlcn53dec8boakd7laug1gtkpl1nma.apps.googleusercontent.com',
   );
 
   static FirebaseOptions get firebaseOptions => FirebaseOptions(

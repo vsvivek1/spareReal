@@ -63,8 +63,21 @@ class AuthService {
       );
       _googleReady = true;
     }
-    final account = await google.authenticate();
+    final GoogleSignInAccount account;
+    try {
+      account = await google.authenticate();
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        throw ApiException('Google sign-in was cancelled.');
+      }
+      // Usually a missing SHA-1 / Android app in Firebase; keep the detail so
+      // it can be diagnosed from the message the user sees.
+      throw ApiException("Couldn't sign in with Google (${e.code.name}: ${e.description ?? ''}).");
+    }
     final idToken = account.authentication.idToken;
+    if (idToken == null) {
+      throw ApiException("Couldn't sign in with Google. Please try again.");
+    }
     await _auth.signInWithCredential(GoogleAuthProvider.credential(idToken: idToken));
   }
 

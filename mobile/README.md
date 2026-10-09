@@ -33,7 +33,7 @@ lives on another domain.
    `com.calecutech.sparex`. Copy each app ID into `FIREBASE_ANDROID_APP_ID` /
    `FIREBASE_IOS_APP_ID`. Add your upload key's and Play's app-signing SHA-1
    and SHA-256 to the Android app so Google sign-in works.
-2. **Google sign-in:** `GOOGLE_SERVER_CLIENT_ID` is the *Web client* ID under
+2. **Google sign-in:** `GOOGLE_SERVER_CLIENT_ID` (defaults to the project's web client ID) is the *Web client* ID under
    Authentication → Sign-in method → Google.
 3. **MSG91:** turn on *Mobile Integration* for the OTP widget, otherwise SMS
    login fails from the app.
