@@ -1,0 +1,34 @@
+name: Flush dummy data
+
+# One-off cleanup of test records in the live Firestore database, approved by
+# the owner on 2026-10-10. Runs only when started by hand. Needs the
+# FIREBASE_SERVICE_ACCOUNT repo secret (the Firebase Admin SDK key from
+# Project settings > Service accounts).
+on:
+  workflow_dispatch:
+
+jobs:
+  flush:
+    runs-on: ubuntu-latest
+    env:
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+    steps:
+      - name: Check secret
+        if: env.FIREBASE_SERVICE_ACCOUNT == ''
+        run: |
+          echo "::error::FIREBASE_SERVICE_ACCOUNT secret not set; nothing was deleted."
+          exit 1
+      - name: Delete test records
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          for doc in \
+            spareListings/1La8bwSITGm75iLSUPnA \
+            spareRequests/PqZ606KM4eWEVaAzc18H \
+            spareRequests/rXllXbv4Wpw7JlgG4mPc \
+            spareRequests/V2t8kSf9U1BpZ7EvfdY8 \
+            reviews/PbBNmgLYeGovzHaQBlzH \
+            users/WlxoBp86dJc0XyL9rGpsfq9jbYr2; do
+            echo "Deleting $doc"
+            npx --yes firebase-tools@latest firestore:delete "$doc" --project sparex-79653 --force --non-interactive
+          done
