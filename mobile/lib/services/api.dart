@@ -24,19 +24,23 @@ class Api {
     return body;
   }
 
-  static Future<Map<String, dynamic>> post(String path, Map<String, dynamic> data,
-      {bool auth = false}) async {
+  static Future<Map<String, String>> _headers(bool auth) async {
     final headers = {'Content-Type': 'application/json'};
     if (auth) {
       final token = await FirebaseAuth.instance.currentUser?.getIdToken();
       if (token == null) throw ApiException('Please log in first.');
       headers['Authorization'] = 'Bearer $token';
     }
-    return _decode(await http.post(_uri(path), headers: headers, body: jsonEncode(data)));
+    return headers;
   }
 
-  static Future<Map<String, dynamic>> get(String path, Map<String, String> query) async =>
-      _decode(await http.get(_uri(path, query)));
+  static Future<Map<String, dynamic>> post(String path, Map<String, dynamic> data,
+          {bool auth = false}) async =>
+      _decode(await http.post(_uri(path), headers: await _headers(auth), body: jsonEncode(data)));
+
+  static Future<Map<String, dynamic>> get(String path, Map<String, String> query,
+          {bool auth = false}) async =>
+      _decode(await http.get(_uri(path, query), headers: await _headers(auth)));
 }
 
 class ApiException implements Exception {

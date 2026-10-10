@@ -133,22 +133,19 @@ Future<void> createBooking({
       'note': note,
     }, auth: true);
 
-int _bySlot(Doc a, Doc b) =>
-    '${a['date']} ${a['time']}'.compareTo('${b['date']} ${b['time']}');
+/// Bookings I made, and bookings customers made at services I own. Loaded
+/// through /api/bookings/mine so they don't depend on Firestore rules.
+Future<(List<Doc>, List<Doc>)> getAllMyBookings() async {
+  final data = await Api.get('/api/bookings/mine', {}, auth: true);
+  List<Doc> list(String key) =>
+      (data[key] as List).map((b) => Map<String, dynamic>.from(b as Map)).toList();
+  return (list('mine'), list('incoming'));
+}
 
-Future<List<Doc>> getMyBookings() async => _docs(await _db
-    .collection('bookings')
-    .where('customerId', isEqualTo: _uid)
-    .get())
-  ..sort(_bySlot);
+/// Either side can cancel an open booking.
+Future<void> cancelBooking(String id) =>
+    Api.post('/api/bookings/update', {'id': id, 'action': 'cancel'}, auth: true);
 
-Future<List<Doc>> getBookingsForMyServices() async => _docs(await _db
-    .collection('bookings')
-    .where('ownerId', isEqualTo: _uid)
-    .get())
-  ..sort(_bySlot);
-
-Future<void> cancelBooking(String id) => _db.collection('bookings').doc(id).update({
-      'status': 'cancelled',
-      'cancelledAt': DateTime.now().toUtc().toIso8601String(),
-    });
+/// The service owner marks the job as done.
+Future<void> completeBooking(String id) =>
+    Api.post('/api/bookings/update', {'id': id, 'action': 'complete'}, auth: true);

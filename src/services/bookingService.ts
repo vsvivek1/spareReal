@@ -1,13 +1,4 @@
-import {
-  collection,
-  doc,
-  getDocs,
-  query,
-  updateDoc,
-  where,
-} from "firebase/firestore";
-
-import { auth, db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 
 export type SlotAvailability = {
   time: string;
@@ -37,16 +28,11 @@ export const createBooking = async (booking: {
   vehicle: string;
   note: string;
 }) => {
-  const token = await auth.currentUser?.getIdToken();
-
-  if (!token) throw new Error("Please log in to book a slot.");
+  if (!auth.currentUser) throw new Error("Please log in to book a slot.");
 
   const response = await fetch("/api/bookings", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: await authHeaders(),
     body: JSON.stringify(booking),
   });
   const data = await response.json();
@@ -56,30 +42,48 @@ export const createBooking = async (booking: {
   return data.id as string;
 };
 
-const sortBySlot = (a: any, b: any) =>
-  `${a.date} ${a.time}` < `${b.date} ${b.time}` ? -1 : 1;
+const authHeaders = async () => {
+  const token = await auth.currentUser?.getIdToken();
 
-const fetchWhere = async (field: string, uid: string) => {
-  const snapshot = await getDocs(
-    query(collection(db, "bookings"), where(field, "==", uid))
-  );
+  if (!token) throw new Error("Please log in first.");
 
-  return snapshot.docs
-    .map((d) => ({ id: d.id, ...d.data() }) as any)
-    .sort(sortBySlot);
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
 };
 
-// Bookings I made as a customer.
-export const getMyBookings = (uid: string) => fetchWhere("customerId", uid);
-
-// Bookings customers made at services I own.
-export const getBookingsForMyServices = (uid: string) =>
-  fetchWhere("ownerId", uid);
-
-// Either side can cancel; the rules only allow flipping status to "cancelled".
-export const cancelServiceBooking = async (bookingId: string) => {
-  await updateDoc(doc(db, "bookings", bookingId), {
-    status: "cancelled",
-    cancelledAt: new Date().toISOString(),
+// Bookings I made as a customer, and bookings customers made at services I
+// own. Loaded through the API (Admin SDK), not straight from Firestore.
+export const getAllMyBookings = async (): Promise<{
+  mine: any[];
+  incoming: any[];
+}> => {
+  const response = await fetch("/api/bookings/mine", {
+    headers: await authHeaders(),
   });
+  const data = await response.json();
+
+  if (!response.ok) throw new Error(data.error || "Couldn't load bookings.");
+
+  return data;
 };
+
+const updateBooking = async (id: string, action: "cancel" | "complete") => {
+  const response = await fetch("/api/bookings/update", {
+    method: "POST",
+    headers: await authHeaders(),
+    body: JSON.stringify({ id, action }),
+  });
+  const data = await response.json();
+
+  if (!response.ok) throw new Error(data.error || "Couldn't update booking.");
+};
+
+// Either side can cancel a booking that's still open.
+export const cancelServiceBooking = (bookingId: string) =>
+  updateBooking(bookingId, "cancel");
+
+// The service owner marks the job as done.
+export const completeServiceBooking = (bookingId: string) =>
+  updateBooking(bookingId, "complete");

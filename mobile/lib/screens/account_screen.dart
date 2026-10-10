@@ -131,13 +131,16 @@ class _MyBookings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => AsyncView<(List<Doc>, List<Doc>)>(
-        load: () async => (await getMyBookings(), await getBookingsForMyServices()),
+        load: getAllMyBookings,
         builder: (context, data, reload) {
           final (mine, incoming) = data;
           final today = todayIST();
 
           Widget card(Doc b, bool asOwner) {
-            final upcoming = b['status'] == 'booked' && '${b['date']}'.compareTo(today) >= 0;
+            final open = b['status'] == 'booked';
+            final upcoming = open && '${b['date']}'.compareTo(today) >= 0;
+            // Owners can close a job once its day has come.
+            final canComplete = asOwner && open && '${b['date']}'.compareTo(today) <= 0;
             final phone = '${asOwner ? b['customerPhone'] : b['servicePhone'] ?? ''}';
             return Card(
               child: Padding(
@@ -158,24 +161,43 @@ class _MyBookings extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  if (upcoming)
-                    Row(children: [
-                      if (phone.isNotEmpty)
+                  if (upcoming || canComplete)
+                    Wrap(children: [
+                      if (upcoming && phone.isNotEmpty)
                         TextButton.icon(
                           onPressed: () => openWhatsApp(phone,
                               'Hi, about the spareX booking on ${formatDateLabel(b['date'])} at ${formatTimeLabel(b['time'])}.'),
                           icon: const Icon(Icons.chat, size: 18),
                           label: const Text('WhatsApp'),
                         ),
-                      TextButton.icon(
-                        onPressed: () async {
-                          if (!await _confirm(context, 'Cancel this booking?')) return;
-                          await cancelBooking(b['id']);
-                          await reload();
-                        },
-                        icon: const Icon(Icons.cancel_outlined, size: 18),
-                        label: const Text('Cancel'),
-                      ),
+                      if (canComplete)
+                        TextButton.icon(
+                          onPressed: () async {
+                            if (!await _confirm(context, 'Mark this job as done?')) return;
+                            try {
+                              await completeBooking(b['id']);
+                            } catch (e) {
+                              if (context.mounted) showMessage(context, e);
+                            }
+                            await reload();
+                          },
+                          icon: const Icon(Icons.check_circle_outline, size: 18),
+                          label: const Text('Mark done'),
+                        ),
+                      if (upcoming)
+                        TextButton.icon(
+                          onPressed: () async {
+                            if (!await _confirm(context, 'Cancel this booking?')) return;
+                            try {
+                              await cancelBooking(b['id']);
+                            } catch (e) {
+                              if (context.mounted) showMessage(context, e);
+                            }
+                            await reload();
+                          },
+                          icon: const Icon(Icons.cancel_outlined, size: 18),
+                          label: const Text('Cancel'),
+                        ),
                     ]),
                 ]),
               ),

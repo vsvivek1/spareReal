@@ -11,8 +11,8 @@ import { whatsAppLink } from "@/lib/contact";
 
 import {
   cancelServiceBooking,
-  getBookingsForMyServices,
-  getMyBookings,
+  completeServiceBooking,
+  getAllMyBookings,
 } from "@/services/bookingService";
 
 export default function BookingsTab() {
@@ -30,12 +30,9 @@ export default function BookingsTab() {
     }
 
     try {
-      const [myBookings, serviceBookings] = await Promise.all([
-        getMyBookings(user.uid),
-        getBookingsForMyServices(user.uid),
-      ]);
-      setMine(myBookings);
-      setIncoming(serviceBookings);
+      const { mine, incoming } = await getAllMyBookings();
+      setMine(mine);
+      setIncoming(incoming);
     } catch (error) {
       console.log(error);
     } finally {
@@ -48,17 +45,21 @@ export default function BookingsTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const handleCancel = async (id: string) => {
-    if (!confirm("Cancel this booking?")) return;
+  const handleAction = async (id: string, action: "cancel" | "complete") => {
+    const question =
+      action === "cancel" ? "Cancel this booking?" : "Mark this job as done?";
+    if (!confirm(question)) return;
 
     setActionId(id);
 
     try {
-      await cancelServiceBooking(id);
+      await (action === "cancel"
+        ? cancelServiceBooking(id)
+        : completeServiceBooking(id));
       await load();
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
-      alert("Couldn't cancel this booking. Please try again.");
+      alert(error?.message || "Couldn't update this booking. Please try again.");
     } finally {
       setActionId(null);
     }
@@ -76,7 +77,10 @@ export default function BookingsTab() {
   const today = todayIST();
 
   const renderCard = (b: any, asOwner: boolean) => {
-    const upcoming = b.status === "booked" && b.date >= today;
+    const open = b.status === "booked";
+    const upcoming = open && b.date >= today;
+    // Owners can close a job once its day has come.
+    const canComplete = asOwner && open && b.date <= today;
     const contactPhone = asOwner ? b.customerPhone : b.servicePhone;
 
     return (
@@ -102,9 +106,9 @@ export default function BookingsTab() {
           {b.status === "cancelled" ? "Cancelled" : upcoming ? "Booked" : "Done"}
         </span>
 
-        {upcoming && (
+        {(upcoming || canComplete) && (
           <div className="gx-detail-actions" style={{ marginTop: 12 }}>
-            {contactPhone && (
+            {upcoming && contactPhone && (
               <a
                 href={whatsAppLink(
                   contactPhone,
@@ -117,13 +121,24 @@ export default function BookingsTab() {
                 💬 WhatsApp
               </a>
             )}
-            <button
-              className="gx-btn gx-btn-danger-outline"
-              onClick={() => handleCancel(b.id)}
-              disabled={actionId === b.id}
-            >
-              {actionId === b.id ? "..." : "Cancel"}
-            </button>
+            {canComplete && (
+              <button
+                className="gx-btn gx-btn-primary"
+                onClick={() => handleAction(b.id, "complete")}
+                disabled={actionId === b.id}
+              >
+                {actionId === b.id ? "..." : "✓ Mark done"}
+              </button>
+            )}
+            {upcoming && (
+              <button
+                className="gx-btn gx-btn-danger-outline"
+                onClick={() => handleAction(b.id, "cancel")}
+                disabled={actionId === b.id}
+              >
+                {actionId === b.id ? "..." : "Cancel"}
+              </button>
+            )}
           </div>
         )}
       </div>
