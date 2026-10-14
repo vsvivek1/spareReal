@@ -11,6 +11,8 @@ import { db } from "@/lib/firebase";
 import { VEHICLE_MAKES, formatVehicleLabel } from "@/lib/vehicleMakes";
 
 import { whatsAppLink } from "@/lib/contact";
+import PartImage from "@/components/PartImage";
+import { formatPrice, matchesSearch } from "@/lib/format";
 
 export default function GroundPage() {
   const [activeTab, setActiveTab] = useState("listings");
@@ -70,19 +72,14 @@ export default function GroundPage() {
     .filter((item) => {
       const isAvailable = (item.status || "Available") === "Available";
 
-      const searchHaystack = [
+      const matchesQuery = matchesSearch(search, [
         item.title,
         item.make,
         item.model,
         item.year,
         item.vehicle,
         item.partNumber,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      const matchesSearch = searchHaystack.includes(search.toLowerCase());
+      ]);
 
       const matchesCategory = !category || item.category === category;
       const matchesDistrict = !district || item.district === district;
@@ -95,7 +92,7 @@ export default function GroundPage() {
 
       return (
         isAvailable &&
-        matchesSearch &&
+        matchesQuery &&
         matchesCategory &&
         matchesDistrict &&
         matchesMake &&
@@ -114,13 +111,15 @@ export default function GroundPage() {
     });
 
   const filteredRequests = requests.filter((item) => {
-    const matchesSearch =
-      item.sparePart?.toLowerCase().includes(search.toLowerCase()) ||
-      item.brand?.toLowerCase().includes(search.toLowerCase());
+    const matchesQuery = matchesSearch(search, [
+      item.sparePart,
+      item.brand,
+      item.vehicle,
+    ]);
 
     const matchesDistrict = !district || item.district === district;
 
-    return matchesSearch && matchesDistrict;
+    return matchesQuery && matchesDistrict;
   });
 
   if (loading) {
@@ -271,7 +270,7 @@ export default function GroundPage() {
               {filteredListings.map((item) => (
                 <div className="gx-part-card" key={item.id}>
                   <div className="gx-part-image">
-                    <img src={item.imageUrl} alt={item.title} />
+                    <PartImage src={item.imageUrl} alt={item.title} />
                     {item.condition && (
                       <span className="gx-badge-pill">{item.condition}</span>
                     )}
@@ -284,7 +283,7 @@ export default function GroundPage() {
                       {item.category ? ` · ${item.category}` : ""}
                     </p>
                     <p className="gx-part-price">
-                      ₹{item.price}
+                      {formatPrice(item.price)}
                       {item.unitType === "Weight" ? " / kg" : ""}
                     </p>
                     {item.unitType === "Weight" && (
@@ -327,7 +326,7 @@ export default function GroundPage() {
                   <p className="gx-part-meta" style={{ marginBottom: 10 }}>
                     {item.brand} {item.model}
                   </p>
-                  <p className="gx-request-budget">₹{item.budget}</p>
+                  <p className="gx-request-budget">{formatPrice(item.budget)}</p>
 
                   <div className="gx-request-meta-row">
                     <span className="gx-request-meta-label">Year</span>

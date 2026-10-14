@@ -9,6 +9,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { formatPrice } from "@/lib/format";
 
 export default function RequestsTab() {
   const { user } = useAuth();
@@ -99,7 +100,7 @@ export default function RequestsTab() {
           {requests.map((item) => (
             <div className="gx-request-card" key={item.id}>
               <h3 className="gx-request-title">{item.sparePart}</h3>
-              <p className="gx-request-budget">₹{item.budget}</p>
+              <p className="gx-request-budget">{formatPrice(item.budget)}</p>
 
               <div className="gx-request-meta-row">
                 <span className="gx-request-meta-label">Brand</span>

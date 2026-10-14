@@ -12,6 +12,8 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 
 import { VEHICLE_MAKES, formatVehicleLabel } from "@/lib/vehicleMakes";
+import PartImage from "@/components/PartImage";
+import { formatPrice, matchesSearch } from "@/lib/format";
 
 function SparePartsInner() {
   const router = useRouter();
@@ -64,19 +66,16 @@ function SparePartsInner() {
     .filter((item) => {
       const isAvailable = (item.status || "Available") === "Available";
 
-      const haystack = [
+      const matchesQuery = matchesSearch(search, [
         item.title,
         item.make,
         item.model,
         item.year,
         item.vehicle,
         item.partNumber,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+        item.category,
+      ]);
 
-      const matchesSearch = haystack.includes(search.toLowerCase());
       const matchesCategory = !category || item.category === category;
       const matchesDistrict = !district || item.district === district;
       const matchesMake = !make || item.make === make;
@@ -88,7 +87,7 @@ function SparePartsInner() {
 
       return (
         isAvailable &&
-        matchesSearch &&
+        matchesQuery &&
         matchesCategory &&
         matchesDistrict &&
         matchesMake &&
@@ -105,6 +104,20 @@ function SparePartsInner() {
         new Date(a.createdAt || 0).getTime()
       );
     });
+
+  const filtersActive = Boolean(
+    search || category || district || make || year || minPrice || maxPrice
+  );
+
+  const clearFilters = () => {
+    setSearch("");
+    setCategory("");
+    setDistrict("");
+    setMake("");
+    setYear("");
+    setMinPrice("");
+    setMaxPrice("");
+  };
 
   const myListings = user
     ? listings
@@ -250,6 +263,33 @@ function SparePartsInner() {
               </select>
             </div>
 
+            {!loading && (
+              <div
+                className="gx-dash-sub"
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  margin: "0 0 14px",
+                }}
+              >
+                <span>
+                  {buyListings.length}{" "}
+                  {buyListings.length === 1 ? "part" : "parts"} found
+                </span>
+                {filtersActive && (
+                  <button
+                    type="button"
+                    className="gx-section-link"
+                    style={{ background: "none", border: "none", cursor: "pointer" }}
+                    onClick={clearFilters}
+                  >
+                    Clear filters
+                  </button>
+                )}
+              </div>
+            )}
+
             {loading ? (
               <div className="gx-page-center">
                 <span className="gx-spinner" />
@@ -260,15 +300,27 @@ function SparePartsInner() {
                 <div className="gx-empty-state-icon">📦</div>
                 <h2 className="gx-empty-state-title">No listings found</h2>
                 <p className="gx-empty-state-text">
-                  Try a different search or filter.
+                  {filtersActive
+                    ? "Try a different search or filter."
+                    : "No parts are listed yet. Check back soon."}
                 </p>
+                {filtersActive && (
+                  <button
+                    type="button"
+                    className="gx-btn gx-btn-outline"
+                    style={{ width: "auto", marginTop: 12 }}
+                    onClick={clearFilters}
+                  >
+                    Clear filters
+                  </button>
+                )}
               </div>
             ) : (
               <div className="gx-grid">
                 {buyListings.map((item) => (
                   <div className="gx-part-card" key={item.id}>
                     <div className="gx-part-image">
-                      <img src={item.imageUrl} alt={item.title} />
+                      <PartImage src={item.imageUrl} alt={item.title} />
                       {item.condition && (
                         <span className="gx-badge-pill">{item.condition}</span>
                       )}
@@ -281,7 +333,7 @@ function SparePartsInner() {
                         {item.category ? ` · ${item.category}` : ""}
                       </p>
                       <p className="gx-part-price">
-                        ₹{item.price}
+                        {formatPrice(item.price)}
                         {item.unitType === "Weight" ? " / kg" : ""}
                       </p>
                       {item.unitType === "Weight" && (
@@ -372,7 +424,7 @@ function SparePartsInner() {
                 {myListings.map((item) => (
                   <div className="gx-part-card" key={item.id}>
                     <div className="gx-part-image">
-                      <img src={item.imageUrl} alt={item.title} />
+                      <PartImage src={item.imageUrl} alt={item.title} />
                       <span className="gx-badge-pill">
                         {item.status || "Available"}
                       </span>
@@ -385,7 +437,7 @@ function SparePartsInner() {
                         {item.category ? ` · ${item.category}` : ""}
                       </p>
                       <p className="gx-part-price">
-                        ₹{item.price}
+                        {formatPrice(item.price)}
                         {item.unitType === "Weight" ? " / kg" : ""}
                       </p>
 

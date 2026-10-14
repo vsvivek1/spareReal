@@ -15,6 +15,8 @@ import { getUserProfile } from "@/services/userService";
 import { getServicesByType } from "@/services/workshopService";
 
 import { formatVehicleLabel } from "@/lib/vehicleMakes";
+import PartImage from "@/components/PartImage";
+import { formatPrice, matchesSearch } from "@/lib/format";
 
 const features = [
   {
@@ -95,7 +97,7 @@ export default function HomePage() {
     .filter((item) => {
       const isAvailable = (item.status || "Available") === "Available";
 
-      const haystack = [
+      const matchesQuery = matchesSearch(search, [
         item.title,
         item.make,
         item.model,
@@ -103,12 +105,9 @@ export default function HomePage() {
         item.vehicle,
         item.partNumber,
         item.category,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+      ]);
 
-      return isAvailable && haystack.includes(search.toLowerCase());
+      return isAvailable && matchesQuery;
     })
     .sort(
       (a, b) =>
@@ -266,7 +265,7 @@ export default function HomePage() {
             {newListings.map((item) => (
               <div className="gx-part-card" key={item.id}>
                 <div className="gx-part-image">
-                  <img src={item.imageUrl} alt={item.title} />
+                  <PartImage src={item.imageUrl} alt={item.title} />
                   {item.condition && (
                     <span className="gx-badge-pill">{item.condition}</span>
                   )}
@@ -279,7 +278,7 @@ export default function HomePage() {
                     {item.category ? ` · ${item.category}` : ""}
                   </p>
                   <p className="gx-part-price">
-                    ₹{item.price}
+                    {formatPrice(item.price)}
                     {item.unitType === "Weight" ? " / kg" : ""}
                   </p>
 

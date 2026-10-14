@@ -21,6 +21,8 @@ import { getListingsByPartNumber } from "@/services/listingService";
 import { formatVehicleLabel } from "@/lib/vehicleMakes";
 
 import { whatsAppLink } from "@/lib/contact";
+import PartImage from "@/components/PartImage";
+import { formatPrice } from "@/lib/format";
 
 const statusClass: Record<string, string> = {
   Available: "gx-status-available",
@@ -281,7 +283,7 @@ export default function ListingDetailPage() {
             )}
 
             <p className="gx-detail-price">
-              ₹{listing.price}
+              {formatPrice(listing.price)}
               {listing.unitType === "Weight" ? "/kg" : ""}
               <span>
                 {" "}
@@ -363,7 +365,7 @@ export default function ListingDetailPage() {
               {interchangeListings.map((item) => (
                 <div className="gx-part-card" key={item.id}>
                   <div className="gx-part-image">
-                    <img src={item.imageUrl} alt={item.title} />
+                    <PartImage src={item.imageUrl} alt={item.title} />
                     {item.condition && (
                       <span className="gx-badge-pill">{item.condition}</span>
                     )}
@@ -376,7 +378,7 @@ export default function ListingDetailPage() {
                       {item.district ? ` · 📍 ${item.district}` : ""}
                     </p>
                     <p className="gx-part-price">
-                      ₹{item.price}
+                      {formatPrice(item.price)}
                       {item.unitType === "Weight" ? " / kg" : ""}
                     </p>
 

@@ -11,6 +11,8 @@ import { getVehicle, getVehicleListings } from "@/services/vehicleService";
 import { formatVehicleLabel } from "@/lib/vehicleMakes";
 
 import { whatsAppLink } from "@/lib/contact";
+import PartImage from "@/components/PartImage";
+import { formatPrice } from "@/lib/format";
 
 export default function VehicleDetailPage() {
   const params = useParams();
@@ -187,7 +189,7 @@ export default function VehicleDetailPage() {
             {availableListings.map((item) => (
               <div className="gx-part-card" key={item.id}>
                 <div className="gx-part-image">
-                  <img src={item.imageUrl} alt={item.title} />
+                  <PartImage src={item.imageUrl} alt={item.title} />
                   {item.condition && (
                     <span className="gx-badge-pill">{item.condition}</span>
                   )}
@@ -199,7 +201,7 @@ export default function VehicleDetailPage() {
                     {item.category}
                   </p>
                   <p className="gx-part-price">
-                    ₹{item.price}
+                    {formatPrice(item.price)}
                     {item.unitType === "Weight" ? " / kg" : ""}
                   </p>
 

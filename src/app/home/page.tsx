@@ -7,6 +7,8 @@ import Link from "next/link";
 import { collection, getDocs } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import PartImage from "@/components/PartImage";
+import { formatPrice, matchesSearch } from "@/lib/format";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("listings");
@@ -58,24 +60,30 @@ export default function HomePage() {
   const filteredListings = listings.filter((item) => {
     const isAvailable = (item.status || "Available") === "Available";
 
-    const matchesSearch =
-      item.title?.toLowerCase().includes(search.toLowerCase()) ||
-      item.vehicle?.toLowerCase().includes(search.toLowerCase());
+    const matchesQuery = matchesSearch(search, [
+      item.title,
+      item.make,
+      item.model,
+      item.vehicle,
+      item.partNumber,
+    ]);
 
     const matchesCategory = !category || item.category === category;
     const matchesDistrict = !district || item.district === district;
 
-    return isAvailable && matchesSearch && matchesCategory && matchesDistrict;
+    return isAvailable && matchesQuery && matchesCategory && matchesDistrict;
   });
 
   const filteredRequests = requests.filter((item) => {
-    const matchesSearch =
-      item.sparePart?.toLowerCase().includes(search.toLowerCase()) ||
-      item.brand?.toLowerCase().includes(search.toLowerCase());
+    const matchesQuery = matchesSearch(search, [
+      item.sparePart,
+      item.brand,
+      item.vehicle,
+    ]);
 
     const matchesDistrict = !district || item.district === district;
 
-    return matchesSearch && matchesDistrict;
+    return matchesQuery && matchesDistrict;
   });
 
   if (loading) {
@@ -180,7 +188,7 @@ export default function HomePage() {
               {filteredListings.map((item) => (
                 <div className="gx-part-card" key={item.id}>
                   <div className="gx-part-image">
-                    <img src={item.imageUrl} alt={item.title} />
+                    <PartImage src={item.imageUrl} alt={item.title} />
                     {item.condition && (
                       <span className="gx-badge-pill">{item.condition}</span>
                     )}
@@ -193,7 +201,7 @@ export default function HomePage() {
                       {item.category ? ` · ${item.category}` : ""}
                     </p>
                     <p className="gx-part-price">
-                      ₹{item.price}
+                      {formatPrice(item.price)}
                       {item.unitType === "Weight" ? " / kg" : ""}
                     </p>
                     {item.unitType === "Weight" && (
@@ -236,7 +244,7 @@ export default function HomePage() {
                   <p className="gx-part-meta" style={{ marginBottom: 10 }}>
                     {item.brand} {item.model}
                   </p>
-                  <p className="gx-request-budget">₹{item.budget}</p>
+                  <p className="gx-request-budget">{formatPrice(item.budget)}</p>
 
                   <div className="gx-request-meta-row">
                     <span className="gx-request-meta-label">Year</span>
