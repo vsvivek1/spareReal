@@ -25,6 +25,7 @@ import {
   SLOT_MINUTE_OPTIONS,
   isBookableSlug,
 } from "@/lib/booking";
+import RequireLogin from "@/components/RequireLogin";
 
 function AddServiceForm() {
   const router = useRouter();
@@ -395,7 +396,9 @@ export default function AddServicePage() {
         </div>
       }
     >
-      <AddServiceForm />
+      <RequireLogin message="Log in to list a service.">
+        <AddServiceForm />
+      </RequireLogin>
     </Suspense>
   );
 }

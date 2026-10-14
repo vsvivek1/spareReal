@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -10,6 +10,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 import { useAuth } from "@/contexts/AuthContext";
+
+import { loginHref } from "@/lib/loginRedirect";
 
 import {
   bookableDates,
@@ -41,6 +43,10 @@ export default function BookSlotPage() {
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [time, setTime] = useState("");
 
+  // Late in the day every slot today has gone by; jump to tomorrow once
+  // so people don't land on a grid of greyed-out times.
+  const skippedPastDay = useRef(false);
+
   const [vehicle, setVehicle] = useState("");
   const [note, setNote] = useState("");
 
@@ -71,7 +77,20 @@ export default function BookSlotPage() {
       setError("");
 
       try {
-        setSlots(await getSlotAvailability(id, date));
+        const next = await getSlotAvailability(id, date);
+
+        if (
+          !skippedPastDay.current &&
+          date === dates[0] &&
+          next.length > 0 &&
+          next.every((s) => s.past)
+        ) {
+          skippedPastDay.current = true;
+          setDate(dates[1]);
+          return;
+        }
+
+        setSlots(next);
       } catch (slotError) {
         setSlots([]);
         setError(
@@ -83,13 +102,15 @@ export default function BookSlotPage() {
     };
 
     loadSlots();
+    // dates is recomputed each render but only changes at midnight.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [service, id, date]);
 
   const handleBook = async () => {
     setError("");
 
     if (!user) {
-      router.push("/login");
+      router.push(loginHref(`/book/${id}`));
       return;
     }
 

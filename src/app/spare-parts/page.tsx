@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { VEHICLE_MAKES, formatVehicleLabel } from "@/lib/vehicleMakes";
 import PartImage from "@/components/PartImage";
 import { formatPrice, matchesSearch } from "@/lib/format";
+import { loginHref } from "@/lib/loginRedirect";
 
 function SparePartsInner() {
   const router = useRouter();
@@ -405,7 +406,10 @@ function SparePartsInner() {
                 <div className="gx-empty-state-icon">🔑</div>
                 <h2 className="gx-empty-state-title">Log in to sell</h2>
                 <p className="gx-empty-state-text">
-                  <Link href="/login" className="gx-section-link">
+                  <Link
+                    href={loginHref("/spare-parts?tab=sell")}
+                    className="gx-section-link"
+                  >
                     Log in
                   </Link>{" "}
                   to list parts and manage your listings.

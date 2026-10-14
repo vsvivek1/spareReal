@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { signInWithGoogle } from "@/services/authService";
 
 import { useAuth } from "@/contexts/AuthContext";
 
-export default function LoginPage() {
+import { safeNextPath } from "@/lib/loginRedirect";
+
+function LoginForm() {
 
   const router = useRouter();
+  const next = safeNextPath(useSearchParams().get("next"));
   const { user, loading } = useAuth();
 
   const [error, setError] = useState("");
@@ -19,11 +22,11 @@ export default function LoginPage() {
 
     if (!loading && user) {
 
-      router.push("/");
+      router.replace(next);
 
     }
 
-  }, [user, loading, router]);
+  }, [user, loading, router, next]);
 
   const handleGoogleSignIn = async () => {
 
@@ -35,7 +38,7 @@ export default function LoginPage() {
 
       await signInWithGoogle();
 
-      router.push("/");
+      router.replace(next);
 
     } catch (err) {
 
@@ -93,4 +96,12 @@ export default function LoginPage() {
 
   );
 
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  );
 }

@@ -25,10 +25,11 @@ import { FIELD_HINTS } from "@/lib/helpContent";
 import HelpHint from "@/components/HelpHint";
 
 import { useLanguage, LANGUAGES } from "@/contexts/LanguageContext";
+import RequireLogin from "@/components/RequireLogin";
 
 const MAX_PHOTOS = 6;
 
-export default function AddSparePage() {
+function AddSparePageForm() {
   const { user } = useAuth();
   const { lang } = useLanguage();
 
@@ -894,5 +895,13 @@ export default function AddSparePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AddSparePage() {
+  return (
+    <RequireLogin message="Log in to list a spare part.">
+      <AddSparePageForm />
+    </RequireLogin>
   );
 }

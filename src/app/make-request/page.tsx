@@ -15,8 +15,9 @@ import { VEHICLE_MAKES } from "@/lib/vehicleMakes";
 import { FIELD_HINTS } from "@/lib/helpContent";
 
 import HelpHint from "@/components/HelpHint";
+import RequireLogin from "@/components/RequireLogin";
 
-export default function MakeRequestPage() {
+function MakeRequestPageForm() {
   const { user } = useAuth();
 
   const [requesterDistrict, setRequesterDistrict] = useState("");
@@ -216,5 +217,13 @@ export default function MakeRequestPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MakeRequestPage() {
+  return (
+    <RequireLogin message="Log in to post a part request.">
+      <MakeRequestPageForm />
+    </RequireLogin>
   );
 }

@@ -8,6 +8,7 @@ import ListingsTab from "@/components/account/ListingsTab";
 import RequestsTab from "@/components/account/RequestsTab";
 import VehiclesTab from "@/components/account/VehiclesTab";
 import BookingsTab from "@/components/account/BookingsTab";
+import RequireLogin from "@/components/RequireLogin";
 
 type Tab = "listings" | "requests" | "vehicles" | "bookings";
 
@@ -72,7 +73,9 @@ export default function MyAccountPage() {
         </div>
       }
     >
-      <MyAccountContent />
+      <RequireLogin message="Log in to see your listings, requests, vehicles and bookings.">
+        <MyAccountContent />
+      </RequireLogin>
     </Suspense>
   );
 }

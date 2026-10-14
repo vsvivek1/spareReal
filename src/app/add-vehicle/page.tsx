@@ -21,6 +21,7 @@ import { VEHICLE_MAKES } from "@/lib/vehicleMakes";
 import { FIELD_HINTS } from "@/lib/helpContent";
 
 import HelpHint from "@/components/HelpHint";
+import RequireLogin from "@/components/RequireLogin";
 
 const MAX_PHOTOS = 8;
 
@@ -31,7 +32,7 @@ const ACQUISITION_REASONS = [
   "Other",
 ];
 
-export default function AddVehiclePage() {
+function AddVehiclePageForm() {
   const router = useRouter();
   const { user } = useAuth();
 
@@ -385,5 +386,13 @@ export default function AddVehiclePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AddVehiclePage() {
+  return (
+    <RequireLogin message="Log in to add a vehicle.">
+      <AddVehiclePageForm />
+    </RequireLogin>
   );
 }
