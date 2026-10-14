@@ -15,6 +15,37 @@ import {
   getAllMyBookings,
 } from "@/services/bookingService";
 
+// An .ics file for the booking, so it lands in the phone's calendar with a
+// reminder. Times are IST, which is where every workshop is.
+function calendarLink(b: any) {
+  const start = new Date(`${b.date}T${b.time}:00+05:30`);
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  const stamp = (d: Date) =>
+    d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//spareX//Booking//EN",
+    "BEGIN:VEVENT",
+    `UID:${b.id}@sparex`,
+    `DTSTAMP:${stamp(new Date())}`,
+    `DTSTART:${stamp(start)}`,
+    `DTEND:${stamp(end)}`,
+    `SUMMARY:${b.serviceName} - ${b.vehicle}`,
+    `DESCRIPTION:${(b.note || "Booked on spareX").replace(/\n/g, " ")}`,
+    "BEGIN:VALARM",
+    "TRIGGER:-PT1H",
+    "ACTION:DISPLAY",
+    "DESCRIPTION:Workshop booking in 1 hour",
+    "END:VALARM",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+
+  return `data:text/calendar;charset=utf-8,${encodeURIComponent(lines)}`;
+}
+
 export default function BookingsTab() {
   const { user } = useAuth();
 
@@ -119,6 +150,15 @@ export default function BookingsTab() {
                 className="gx-btn gx-btn-outline"
               >
                 💬 WhatsApp
+              </a>
+            )}
+            {upcoming && !asOwner && (
+              <a
+                href={calendarLink(b)}
+                download={`spareX-booking-${b.date}.ics`}
+                className="gx-btn gx-btn-outline"
+              >
+                📆 Add to calendar
               </a>
             )}
             {canComplete && (

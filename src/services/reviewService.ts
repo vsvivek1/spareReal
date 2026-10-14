@@ -58,3 +58,37 @@ export const getSellerReviews = async (sellerId: string) => {
     return { reviews: [], average: 0, count: 0 };
   }
 };
+
+export type SellerRating = { average: number; count: number };
+
+// Average rating per seller, for showing stars on listing cards. One read
+// of the reviews collection covers a whole page of cards. Never throws.
+export const getSellerRatings = async (): Promise<
+  Record<string, SellerRating>
+> => {
+  try {
+    const snapshot = await getDocs(collection(db, "reviews"));
+
+    const totals: Record<string, { sum: number; count: number }> = {};
+
+    snapshot.forEach((doc) => {
+      const { sellerId, rating } = doc.data() as {
+        sellerId?: string;
+        rating?: number;
+      };
+      if (!sellerId || !rating) return;
+      const t = (totals[sellerId] ||= { sum: 0, count: 0 });
+      t.sum += rating;
+      t.count += 1;
+    });
+
+    const ratings: Record<string, SellerRating> = {};
+    for (const [sellerId, t] of Object.entries(totals)) {
+      ratings[sellerId] = { average: t.sum / t.count, count: t.count };
+    }
+    return ratings;
+  } catch (error) {
+    console.log(error);
+    return {};
+  }
+};

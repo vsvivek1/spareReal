@@ -12,6 +12,36 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 
 import { loginHref } from "@/lib/loginRedirect";
+import {
+  garageLabel,
+  useGarage,
+  type GarageVehicle,
+} from "@/lib/prefs";
+import { VEHICLE_MAKES } from "@/lib/vehicleMakes";
+
+// If the typed vehicle starts with a known make (e.g. "Maruti Suzuki Swift
+// 2016, KL-07-AB-1234") and nothing is saved yet, keep it for next time.
+function rememberVehicle(
+  typed: string,
+  existing: GarageVehicle | null,
+  save: (v: GarageVehicle) => void
+) {
+  if (existing) return;
+
+  const text = typed.trim();
+  const make = VEHICLE_MAKES.find(
+    (m) => m !== "Other" && text.toLowerCase().startsWith(m.toLowerCase())
+  );
+  if (!make) return;
+
+  const rest = text.slice(make.length).replace(/^[\s,]+/, "");
+  const [beforeComma, regNo] = rest.split(",").map((p) => p.trim());
+  const yearMatch = beforeComma.match(/\b(19|20)\d{2}\b/);
+  const model = beforeComma.replace(/\b(19|20)\d{2}\b/, "").trim();
+  if (!model) return;
+
+  save({ make, model, year: yearMatch?.[0], regNo: regNo || undefined });
+}
 
 import {
   bookableDates,
@@ -47,7 +77,17 @@ export default function BookSlotPage() {
   // so people don't land on a grid of greyed-out times.
   const skippedPastDay = useRef(false);
 
+  // Start with the vehicle saved on this device so regulars don't retype it.
+  const { vehicle: garageVehicle, setVehicle: saveGarageVehicle } = useGarage();
   const [vehicle, setVehicle] = useState("");
+  const [vehiclePrefilled, setVehiclePrefilled] = useState(false);
+
+  useEffect(() => {
+    if (!vehiclePrefilled && garageVehicle && !vehicle) {
+      setVehicle(garageLabel(garageVehicle));
+      setVehiclePrefilled(true);
+    }
+  }, [garageVehicle, vehicle, vehiclePrefilled]);
   const [note, setNote] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
@@ -127,6 +167,7 @@ export default function BookSlotPage() {
     try {
       setSubmitting(true);
       await createBooking({ serviceId: id, date, time, vehicle, note });
+      rememberVehicle(vehicle, garageVehicle, saveGarageVehicle);
       router.push("/my-account?tab=bookings");
     } catch (bookError) {
       setError(

@@ -21,8 +21,10 @@ import { getListingsByPartNumber } from "@/services/listingService";
 import { formatVehicleLabel } from "@/lib/vehicleMakes";
 
 import { whatsAppLink } from "@/lib/contact";
-import PartImage from "@/components/PartImage";
 import { formatPrice } from "@/lib/format";
+import PartCard from "@/components/PartCard";
+import SaveButton from "@/components/SaveButton";
+import ShareButton from "@/components/ShareButton";
 
 const statusClass: Record<string, string> = {
   Available: "gx-status-available",
@@ -214,13 +216,31 @@ export default function ListingDetailPage() {
   return (
     <div className="gx-page">
       <div className="gx-container" style={{ maxWidth: 920 }}>
-        <button
-          className="gx-back-link"
-          onClick={() => router.back()}
-          style={{ background: "none", border: "none", cursor: "pointer" }}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 10,
+            flexWrap: "wrap",
+          }}
         >
-          ← Back
-        </button>
+          <button
+            className="gx-back-link"
+            onClick={() => router.back()}
+            style={{ background: "none", border: "none", cursor: "pointer" }}
+          >
+            ← Back
+          </button>
+
+          <div style={{ display: "flex", gap: 8 }}>
+            <SaveButton id={listing.id} floating={false} />
+            <ShareButton
+              title={listing.title}
+              text={`${listing.title} on spareX for ${formatPrice(listing.price)}`}
+            />
+          </div>
+        </div>
 
         <div className="gx-detail-grid">
           <div>
@@ -363,34 +383,7 @@ export default function ListingDetailPage() {
 
             <div className="gx-grid">
               {interchangeListings.map((item) => (
-                <div className="gx-part-card" key={item.id}>
-                  <div className="gx-part-image">
-                    <PartImage src={item.imageUrl} alt={item.title} />
-                    {item.condition && (
-                      <span className="gx-badge-pill">{item.condition}</span>
-                    )}
-                  </div>
-
-                  <div className="gx-part-body">
-                    <h3 className="gx-part-name">{item.title}</h3>
-                    <p className="gx-part-meta">
-                      {formatVehicleLabel(item)}
-                      {item.district ? ` · 📍 ${item.district}` : ""}
-                    </p>
-                    <p className="gx-part-price">
-                      {formatPrice(item.price)}
-                      {item.unitType === "Weight" ? " / kg" : ""}
-                    </p>
-
-                    <div style={{ marginTop: 12 }}>
-                      <Link href={`/listing/${item.id}`}>
-                        <button className="gx-btn gx-btn-outline">
-                          View details
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+                <PartCard key={item.id} item={item} />
               ))}
             </div>
           </div>

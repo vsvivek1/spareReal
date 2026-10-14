@@ -14,9 +14,8 @@ import { getUserProfile } from "@/services/userService";
 
 import { getServicesByType } from "@/services/workshopService";
 
-import { formatVehicleLabel } from "@/lib/vehicleMakes";
-import PartImage from "@/components/PartImage";
-import { formatPrice, matchesSearch } from "@/lib/format";
+import { matchesSearch } from "@/lib/format";
+import PartCard from "@/components/PartCard";
 
 const features = [
   {
@@ -263,38 +262,7 @@ export default function HomePage() {
         ) : (
           <div className="gx-grid">
             {newListings.map((item) => (
-              <div className="gx-part-card" key={item.id}>
-                <div className="gx-part-image">
-                  <PartImage src={item.imageUrl} alt={item.title} />
-                  {item.condition && (
-                    <span className="gx-badge-pill">{item.condition}</span>
-                  )}
-                </div>
-
-                <div className="gx-part-body">
-                  <h3 className="gx-part-name">{item.title}</h3>
-                  <p className="gx-part-meta">
-                    {formatVehicleLabel(item)}
-                    {item.category ? ` · ${item.category}` : ""}
-                  </p>
-                  <p className="gx-part-price">
-                    {formatPrice(item.price)}
-                    {item.unitType === "Weight" ? " / kg" : ""}
-                  </p>
-
-                  <span className="gx-district-tag">
-                    📍 {item.district || "Unknown"}
-                  </span>
-
-                  <div style={{ marginTop: 12 }}>
-                    <Link href={`/listing/${item.id}`}>
-                      <button className="gx-btn gx-btn-outline">
-                        View details
-                      </button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
+              <PartCard key={item.id} item={item} />
             ))}
           </div>
         )}

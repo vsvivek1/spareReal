@@ -23,6 +23,7 @@ const publicLinks = [
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
+  { href: "/saved", label: "Saved" },
   { href: "/my-account", label: "My Account" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/pricing", label: "Pricing" },

@@ -2200,3 +2200,91 @@ textarea::placeholder {
   line-height: 1.55;
   margin: 4px 0 0;
 }
+
+/* saved parts, share, garage */
+
+.gx-part-image {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.gx-part-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.gx-save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(6, 10, 23, 0.65);
+  color: var(--gx-text);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.gx-save-btn:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.gx-save-btn-on {
+  color: var(--gx-danger);
+  border-color: rgba(255, 107, 129, 0.6);
+}
+
+.gx-save-btn-floating {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  justify-content: center;
+  font-size: 17px;
+}
+
+.gx-garage-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  border-radius: var(--gx-radius-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  font-size: 14px;
+}
+
+.gx-garage-bar .gx-input {
+  width: auto;
+  min-width: 140px;
+  flex: 1 1 140px;
+}
+
+.gx-garage-bar .gx-btn {
+  width: auto;
+  padding: 9px 14px;
+}
+
+.gx-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: var(--gx-cyan);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.gx-link-btn:hover {
+  text-decoration: underline;
+}

@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from "react";
 
-import Link from "next/link";
 
 import { collection, getDocs } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
-import PartImage from "@/components/PartImage";
 import { formatPrice, matchesSearch } from "@/lib/format";
+import PartCard from "@/components/PartCard";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("listings");
@@ -186,43 +185,7 @@ export default function HomePage() {
           ) : (
             <div className="gx-grid">
               {filteredListings.map((item) => (
-                <div className="gx-part-card" key={item.id}>
-                  <div className="gx-part-image">
-                    <PartImage src={item.imageUrl} alt={item.title} />
-                    {item.condition && (
-                      <span className="gx-badge-pill">{item.condition}</span>
-                    )}
-                  </div>
-
-                  <div className="gx-part-body">
-                    <h3 className="gx-part-name">{item.title}</h3>
-                    <p className="gx-part-meta">
-                      {item.vehicle}
-                      {item.category ? ` · ${item.category}` : ""}
-                    </p>
-                    <p className="gx-part-price">
-                      {formatPrice(item.price)}
-                      {item.unitType === "Weight" ? " / kg" : ""}
-                    </p>
-                    {item.unitType === "Weight" && (
-                      <p className="gx-part-meta" style={{ margin: "0 0 8px" }}>
-                        {item.quantity} kg available
-                      </p>
-                    )}
-
-                    <span className="gx-district-tag">
-                      📍 {item.district || "Unknown District"}
-                    </span>
-
-                    <div style={{ marginTop: 12 }}>
-                      <Link href={`/listing/${item.id}`}>
-                        <button className="gx-btn gx-btn-outline">
-                          View details
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+                <PartCard key={item.id} item={item} />
               ))}
             </div>
           ))}

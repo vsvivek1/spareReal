@@ -11,10 +11,13 @@ import { db } from "@/lib/firebase";
 
 import { useAuth } from "@/contexts/AuthContext";
 
-import { VEHICLE_MAKES, formatVehicleLabel } from "@/lib/vehicleMakes";
-import PartImage from "@/components/PartImage";
-import { formatPrice, matchesSearch } from "@/lib/format";
+import { VEHICLE_MAKES } from "@/lib/vehicleMakes";
+import { matchesSearch } from "@/lib/format";
 import { loginHref } from "@/lib/loginRedirect";
+import PartCard from "@/components/PartCard";
+import GarageBar from "@/components/GarageBar";
+import { fitsVehicle, useGarage } from "@/lib/prefs";
+import { getSellerRatings, type SellerRating } from "@/services/reviewService";
 
 function SparePartsInner() {
   const router = useRouter();
@@ -39,6 +42,11 @@ function SparePartsInner() {
     "newest"
   );
 
+  const { vehicle: myVehicle } = useGarage();
+  const [onlyFits, setOnlyFits] = useState(false);
+
+  const [ratings, setRatings] = useState<Record<string, SellerRating>>({});
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -56,6 +64,7 @@ function SparePartsInner() {
     };
 
     load();
+    getSellerRatings().then(setRatings);
   }, []);
 
   const changeTab = (next: "buy" | "sell") => {
@@ -77,6 +86,7 @@ function SparePartsInner() {
         item.category,
       ]);
 
+      const matchesGarage = !onlyFits || fitsVehicle(item, myVehicle);
       const matchesCategory = !category || item.category === category;
       const matchesDistrict = !district || item.district === district;
       const matchesMake = !make || item.make === make;
@@ -88,6 +98,7 @@ function SparePartsInner() {
 
       return (
         isAvailable &&
+        matchesGarage &&
         matchesQuery &&
         matchesCategory &&
         matchesDistrict &&
@@ -107,10 +118,11 @@ function SparePartsInner() {
     });
 
   const filtersActive = Boolean(
-    search || category || district || make || year || minPrice || maxPrice
+    search || category || district || make || year || minPrice || maxPrice || onlyFits
   );
 
   const clearFilters = () => {
+    setOnlyFits(false);
     setSearch("");
     setCategory("");
     setDistrict("");
@@ -173,6 +185,8 @@ function SparePartsInner() {
                 </button>
               </Link>
             </div>
+
+            <GarageBar onlyFits={onlyFits} onOnlyFitsChange={setOnlyFits} />
 
             <div className="gx-filter-bar">
               <input
@@ -319,46 +333,7 @@ function SparePartsInner() {
             ) : (
               <div className="gx-grid">
                 {buyListings.map((item) => (
-                  <div className="gx-part-card" key={item.id}>
-                    <div className="gx-part-image">
-                      <PartImage src={item.imageUrl} alt={item.title} />
-                      {item.condition && (
-                        <span className="gx-badge-pill">{item.condition}</span>
-                      )}
-                    </div>
-
-                    <div className="gx-part-body">
-                      <h3 className="gx-part-name">{item.title}</h3>
-                      <p className="gx-part-meta">
-                        {formatVehicleLabel(item)}
-                        {item.category ? ` · ${item.category}` : ""}
-                      </p>
-                      <p className="gx-part-price">
-                        {formatPrice(item.price)}
-                        {item.unitType === "Weight" ? " / kg" : ""}
-                      </p>
-                      {item.unitType === "Weight" && (
-                        <p
-                          className="gx-part-meta"
-                          style={{ margin: "0 0 8px" }}
-                        >
-                          {item.quantity} kg available
-                        </p>
-                      )}
-
-                      <span className="gx-district-tag">
-                        📍 {item.district || "Unknown"}
-                      </span>
-
-                      <div style={{ marginTop: 12 }}>
-                        <Link href={`/listing/${item.id}`}>
-                          <button className="gx-btn gx-btn-outline">
-                            View details
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
+                  <PartCard key={item.id} item={item} rating={ratings[item.sellerId]} />
                 ))}
               </div>
             )}
@@ -426,34 +401,12 @@ function SparePartsInner() {
             ) : (
               <div className="gx-grid">
                 {myListings.map((item) => (
-                  <div className="gx-part-card" key={item.id}>
-                    <div className="gx-part-image">
-                      <PartImage src={item.imageUrl} alt={item.title} />
-                      <span className="gx-badge-pill">
-                        {item.status || "Available"}
-                      </span>
-                    </div>
-
-                    <div className="gx-part-body">
-                      <h3 className="gx-part-name">{item.title}</h3>
-                      <p className="gx-part-meta">
-                        {formatVehicleLabel(item)}
-                        {item.category ? ` · ${item.category}` : ""}
-                      </p>
-                      <p className="gx-part-price">
-                        {formatPrice(item.price)}
-                        {item.unitType === "Weight" ? " / kg" : ""}
-                      </p>
-
-                      <div style={{ marginTop: 12 }}>
-                        <Link href={`/listing/${item.id}`}>
-                          <button className="gx-btn gx-btn-outline">
-                            View
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
+                  <PartCard
+                    key={item.id}
+                    item={item}
+                    badge={item.status || "Available"}
+                    cta="View"
+                  />
                 ))}
               </div>
             )}
