@@ -151,7 +151,7 @@ function AddVehiclePageForm() {
         photoUrls.push(await getDownloadURL(storageRef));
       }
 
-      await addDoc(collection(db, "vehicles"), {
+      const vehicleRef = await addDoc(collection(db, "vehicles"), {
         vehicleType,
         make: resolvedMake,
         model: model.trim(),
@@ -181,7 +181,13 @@ function AddVehiclePageForm() {
       setPhotos([]);
       setPhotoPreviews([]);
 
-      router.push("/my-account?tab=vehicles");
+      // A donor vehicle goes straight to the tick-list so the dealer can
+      // list everything they pulled from it in one go.
+      router.push(
+        vehicleType === "Scrap"
+          ? `/vehicle/${vehicleRef.id}/add-parts`
+          : "/my-account?tab=vehicles"
+      );
     } catch (error) {
       console.log(error);
       setError("Couldn't save this vehicle. Please try again.");
@@ -196,8 +202,9 @@ function AddVehiclePageForm() {
         <div className="gx-page-header">
           <h1 className="gx-dash-title">Add Vehicle</h1>
           <p className="gx-dash-sub">
-            Register a vehicle you&apos;re parting out for sale, or one you
-            just use — keep both in one place.
+            Bought a whole vehicle for parts? Add it once, then tick every
+            part you have and list them all together. You can also keep a
+            record of a vehicle you just use.
           </p>
         </div>
 
@@ -205,7 +212,7 @@ function AddVehiclePageForm() {
           {error && <div className="gx-alert gx-alert-error">{error}</div>}
           {success && (
             <div className="gx-alert gx-alert-success">
-              Vehicle added. You can now link parts to it from Add Spare.
+              Vehicle added.
             </div>
           )}
 

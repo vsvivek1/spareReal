@@ -71,8 +71,8 @@ function VehicleCard({
 
           {!isPersonal && (
             <>
-              <Link href="/add-spare">
-                <button className="gx-btn gx-btn-outline">+ Add part</button>
+              <Link href={`/vehicle/${vehicle.id}/add-parts`}>
+                <button className="gx-btn gx-btn-primary">+ List parts</button>
               </Link>
 
               <button

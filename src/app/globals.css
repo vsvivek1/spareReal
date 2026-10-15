@@ -2288,3 +2288,98 @@ textarea::placeholder {
 .gx-link-btn:hover {
   text-decoration: underline;
 }
+
+/* Donor vehicle: tick the parts you pulled from it */
+.gx-pick-group {
+  margin-bottom: 18px;
+}
+
+.gx-pick-group-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gx-text-dim);
+  margin: 0 0 8px;
+}
+
+.gx-pick-row {
+  border-radius: var(--gx-radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.03);
+  margin-bottom: 6px;
+}
+
+.gx-pick-row-on {
+  border-color: rgba(109, 94, 248, 0.6);
+  background: rgba(109, 94, 248, 0.08);
+}
+
+.gx-pick-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.gx-pick-head input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.gx-pick-done {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.gx-pick-tag {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--gx-success);
+  font-weight: 600;
+}
+
+.gx-pick-details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 12px 40px;
+}
+
+.gx-pick-details .gx-input {
+  width: auto;
+  flex: 1 1 110px;
+  min-width: 100px;
+}
+
+.gx-pick-details .gx-btn {
+  width: auto;
+  padding: 9px 12px;
+}
+
+.gx-pick-thumb {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.gx-pick-footer {
+  position: sticky;
+  bottom: 12px;
+  z-index: 5;
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: var(--gx-radius-md);
+  background: var(--gx-navy-800);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+body.gx-has-tabbar .gx-pick-footer {
+  bottom: 84px;
+}

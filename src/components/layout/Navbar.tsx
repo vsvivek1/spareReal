@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const publicLinks = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
+  { href: "/donor-vehicles", label: "Donor Vehicles" },
   { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
@@ -23,6 +24,7 @@ const publicLinks = [
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
+  { href: "/donor-vehicles", label: "Donor Vehicles" },
   { href: "/saved", label: "Saved" },
   { href: "/my-account", label: "My Account" },
   { href: "/dashboard", label: "Dashboard" },

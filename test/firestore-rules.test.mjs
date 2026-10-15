@@ -84,6 +84,68 @@ await check(
   assertFails(updateDoc(doc(phoneUser2, "spareListings/owned"), { title: "Hijacked" }))
 );
 
+await check(
+  "verified user CANNOT create a listing in someone else's name",
+  assertFails(setDoc(doc(phoneUser2, "spareListings/l5"), { sellerId: "phoneUser", title: "Spoofed" }))
+);
+await check(
+  "owner CANNOT hand their listing to another seller",
+  assertFails(updateDoc(doc(phoneUser, "spareListings/owned"), { sellerId: "phoneUser2" }))
+);
+
+console.log("donor vehicles");
+await check(
+  "verified user CAN add own donor vehicle",
+  assertSucceeds(setDoc(doc(phoneUser, "vehicles/v1"), { sellerId: "phoneUser", make: "Maruti Suzuki", model: "Swift", vehicleType: "Scrap" }))
+);
+await check(
+  "verified user CANNOT add a vehicle in someone else's name",
+  assertFails(setDoc(doc(phoneUser2, "vehicles/v2"), { sellerId: "phoneUser", make: "Tata", model: "Nexon" }))
+);
+await check(
+  "unverified account CANNOT add a vehicle",
+  assertFails(setDoc(doc(unverified, "vehicles/v3"), { sellerId: "attacker", make: "Tata", model: "Nexon" }))
+);
+await check(
+  "anyone CAN read a donor vehicle",
+  assertSucceeds(getDoc(doc(anon, "vehicles/v1")))
+);
+await check(
+  "another user CANNOT edit someone's vehicle",
+  assertFails(updateDoc(doc(phoneUser2, "vehicles/v1"), { status: "Fully Parted Out" }))
+);
+await check(
+  "owner CAN mark own vehicle fully parted out",
+  assertSucceeds(updateDoc(doc(phoneUser, "vehicles/v1"), { status: "Fully Parted Out" }))
+);
+await check(
+  "seller CAN list a part from own donor vehicle",
+  assertSucceeds(setDoc(doc(phoneUser, "spareListings/dv1"), { sellerId: "phoneUser", title: "Headlight, left", vehicleId: "v1" }))
+);
+await check(
+  "seller CANNOT list a part against another dealer's vehicle",
+  assertFails(setDoc(doc(phoneUser2, "spareListings/dv2"), { sellerId: "phoneUser2", title: "Bonnet", vehicleId: "v1" }))
+);
+await check(
+  "seller CANNOT link a part to a vehicle that doesn't exist",
+  assertFails(setDoc(doc(phoneUser, "spareListings/dv3"), { sellerId: "phoneUser", title: "Bonnet", vehicleId: "missing" }))
+);
+await check(
+  "seller CAN edit a part linked to own vehicle",
+  assertSucceeds(updateDoc(doc(phoneUser, "spareListings/dv1"), { price: "1500" }))
+);
+await testEnv.withSecurityRulesDisabled(async (ctx) => {
+  await setDoc(doc(ctx.firestore(), "vehicles/other"), { sellerId: "phoneUser2", make: "Tata", model: "Nexon" });
+});
+await check(
+  "seller CANNOT move own listing onto another dealer's vehicle",
+  assertFails(updateDoc(doc(phoneUser, "spareListings/dv1"), { vehicleId: "other" }))
+);
+await check(
+  "seller CAN unlink own listing from a vehicle",
+  assertSucceeds(updateDoc(doc(phoneUser, "spareListings/dv1"), { vehicleId: null }))
+);
+
 console.log("reviews — create");
 await check(
   "phone-verified user CAN create a valid review",

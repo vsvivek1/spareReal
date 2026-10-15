@@ -188,6 +188,13 @@ function SparePartsInner() {
 
             <GarageBar onlyFits={onlyFits} onOnlyFitsChange={setOnlyFits} />
 
+            <p className="gx-muted" style={{ margin: "-6px 0 14px" }}>
+              🚗 Looking for many parts from one model?{" "}
+              <Link href="/donor-vehicles" className="gx-section-link">
+                Browse donor vehicles
+              </Link>
+            </p>
+
             <div className="gx-filter-bar">
               <input
                 className="gx-input"
@@ -355,6 +362,25 @@ function SparePartsInner() {
               <Link href="/add-spare">
                 <button className="gx-btn gx-btn-primary gx-btn-lg">
                   + List a spare part
+                </button>
+              </Link>
+            </div>
+
+            <div className="gx-premium-banner" style={{ marginBottom: 18 }}>
+              <div>
+                <h2 className="gx-section-title" style={{ marginBottom: 6 }}>
+                  Bought a whole vehicle for parts?
+                </h2>
+                <p className="gx-dash-sub" style={{ margin: 0 }}>
+                  Add the vehicle once, then tick every part you have from it.
+                  They&apos;re all listed together and buyers can see the
+                  whole vehicle.
+                </p>
+              </div>
+
+              <Link href="/add-vehicle">
+                <button className="gx-btn gx-btn-outline gx-btn-lg">
+                  + Add a donor vehicle
                 </button>
               </Link>
             </div>

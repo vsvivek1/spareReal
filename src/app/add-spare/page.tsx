@@ -304,7 +304,11 @@ function AddSparePageForm() {
 
     const vehicle = vehicles.find((v) => v.id === id);
 
-    if (!vehicle) return;
+    if (vehicle) applyVehicle(vehicle);
+  };
+
+  function applyVehicle(vehicle: any) {
+    setVehicleId(vehicle.id);
 
     if (VEHICLE_MAKES.includes(vehicle.make)) {
       setMake(vehicle.make);
@@ -316,7 +320,22 @@ function AddSparePageForm() {
 
     setModel(vehicle.model || "");
     setYear(vehicle.year || "");
-  };
+  }
+
+  // /add-spare?vehicle=<id> comes from a donor vehicle's page, so start
+  // with that vehicle linked and its make/model/year filled, once.
+  const presetApplied = useRef(false);
+
+  useEffect(() => {
+    if (presetApplied.current || vehicles.length === 0) return;
+    presetApplied.current = true;
+
+    const preset = new URLSearchParams(window.location.search).get("vehicle");
+    const match = vehicles.find(
+      (v) => v.id === preset && v.vehicleType !== "Personal"
+    );
+    if (match) applyVehicle(match);
+  }, [vehicles]);
 
   const handleOpenCamera = async () => {
 

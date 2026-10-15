@@ -10,9 +10,11 @@ import { garageLabel, useGarage } from "@/lib/prefs";
 export default function GarageBar({
   onlyFits,
   onOnlyFitsChange,
+  fitsLabel = "Only parts that fit",
 }: {
   onlyFits: boolean;
   onOnlyFitsChange: (next: boolean) => void;
+  fitsLabel?: string;
 }) {
   const { vehicle, setVehicle } = useGarage();
 
@@ -95,7 +97,7 @@ export default function GarageBar({
           checked={onlyFits}
           onChange={(e) => onOnlyFitsChange(e.target.checked)}
         />
-        Only parts that fit
+        {fitsLabel}
       </label>
 
       <span style={{ flex: 1 }} />

@@ -52,6 +52,15 @@ export default function PartCard({
 
         <div className="gx-part-tags">
           <span className="gx-district-tag">📍 {item.district || "Unknown"}</span>
+          {item.vehicleId && (
+            <Link
+              href={`/vehicle/${item.vehicleId}`}
+              className="gx-district-tag"
+              title="See every part from this vehicle"
+            >
+              🚗 Donor vehicle
+            </Link>
+          )}
           {rating && rating.count > 0 && (
             <span className="gx-district-tag" title="Seller rating">
               ⭐ {rating.average.toFixed(1)} ({rating.count})
